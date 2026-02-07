@@ -10,7 +10,7 @@ Pipeline monitoring dashboard for Oblik data ingestion.
 - **Charts:** Recharts
 - **Auth:** NextAuth v5 (Auth.js) with AWS Cognito provider
 - **Cloud:** AWS SDK v3 (DynamoDB, Step Functions, CloudWatch, CloudWatch Logs)
-- **Deployment:** Vercel
+- **Deployment:** AWS Amplify Hosting
 - **Icons:** lucide-react
 - **Dates:** date-fns
 

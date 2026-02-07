@@ -13,7 +13,7 @@ const awsConfig = {
 };
 
 // Lazy singletons — created on first use, reused across requests
-// within a Vercel function instance
+// within a single serverless function instance
 
 let dynamoDBClient: DynamoDBDocumentClient | null = null;
 let sfnClient: SFNClient | null = null;
