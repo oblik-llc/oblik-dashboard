@@ -45,6 +45,11 @@ See `.env.local.example` for all required variables. Key ones:
 - `NEXTAUTH_URL` / `NEXTAUTH_SECRET`
 - `COGNITO_CLIENT_ID` / `COGNITO_CLIENT_SECRET` / `COGNITO_ISSUER`
 
+## Git Workflow
+
+- When starting work on a new GitHub issue, always create a feature branch first (e.g., `feat/issue-12-pipeline-detail`) and open a PR against `main` when done.
+- Do not commit directly to `main` for issue work.
+
 ## Architecture Notes
 
 - **Pipeline registry** lives in a DynamoDB table (`oblik-pipeline-registry`)
