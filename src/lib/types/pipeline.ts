@@ -23,15 +23,39 @@ export interface Pipeline {
 
 // ── Sync State (per-pipeline DynamoDB tables) ──
 
-export interface SyncConfig {
-  [key: string]: unknown;
+export interface SyncStreamResult {
+  count: number;
+  s3_path: string;
+}
+
+export interface SyncStats {
+  total_records: number;
+  execution_duration?: number;
+  streams?: string[];
+  partial_completion?: boolean;
+  results?: Record<string, SyncStreamResult>;
+  // HubSpot-style checkpoints
+  is_checkpoint?: boolean;
+  checkpoint_time?: string;
+  streams_with_state?: string[];
+}
+
+export interface AirbyteStreamState {
+  type: string;
+  stream: {
+    stream_descriptor: { name: string };
+    stream_state: Record<string, unknown>;
+  };
+  sourceStats?: { recordCount: number };
 }
 
 export interface SyncState {
   client_connector: string;
-  last_sync_timestamp: string;
+  last_sync: string;
   last_execution_status: string;
-  sync_config: SyncConfig;
+  updated_at?: string;
+  sync_stats?: SyncStats;
+  airbyte_state?: AirbyteStreamState[];
 }
 
 // ── Step Functions ──
