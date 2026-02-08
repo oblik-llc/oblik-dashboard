@@ -22,7 +22,12 @@ import type {
   MetricDataPointResponse,
   PipelineDetailResponse,
 } from "@/lib/types/api";
-import type { ExecutionSummary, PipelineMetrics } from "@/lib/types/pipeline";
+import type {
+  ExecutionSummary,
+  PipelineMetrics,
+  SyncState,
+} from "@/lib/types/pipeline";
+import type { StreamSummary } from "@/lib/types/api";
 
 export async function GET(
   _request: Request,
@@ -141,17 +146,68 @@ function serializeExecution(exec: ExecutionSummary): ExecutionSummaryResponse {
   };
 }
 
-function serializeSyncState(state: {
-  client_connector: string;
-  last_sync_timestamp: string;
-  last_execution_status: string;
-  sync_config: Record<string, unknown>;
-}): SyncStateResponse {
+function serializeSyncState(state: SyncState): SyncStateResponse {
+  // Build stream summaries by merging sync_stats.results with airbyte_state
+  const streamMap = new Map<
+    string,
+    { count: number | null; s3Path: string | null }
+  >();
+
+  // Populate from sync_stats.results
+  if (state.sync_stats?.results) {
+    for (const [name, result] of Object.entries(state.sync_stats.results)) {
+      streamMap.set(name, { count: result.count, s3Path: result.s3_path });
+    }
+  }
+
+  // Enrich with cursor info from airbyte_state
+  const streams: StreamSummary[] = [];
+  const seen = new Set<string>();
+
+  if (state.airbyte_state) {
+    for (const entry of state.airbyte_state) {
+      const name = entry.stream.stream_descriptor.name;
+      seen.add(name);
+      const statsEntry = streamMap.get(name);
+
+      // Extract cursor: first key that isn't __ab_no_cursor_state_message
+      const stateObj = entry.stream.stream_state;
+      const cursorKeys = Object.keys(stateObj).filter(
+        (k) => k !== "__ab_no_cursor_state_message"
+      );
+      const cursorField = cursorKeys[0] ?? null;
+      const cursorValue = cursorField ? String(stateObj[cursorField]) : null;
+
+      streams.push({
+        name,
+        recordCount: statsEntry?.count ?? null,
+        s3Path: statsEntry?.s3Path ?? null,
+        cursorField,
+        cursorValue,
+      });
+    }
+  }
+
+  // Add any streams from sync_stats that weren't in airbyte_state
+  for (const [name, entry] of streamMap) {
+    if (!seen.has(name)) {
+      streams.push({
+        name,
+        recordCount: entry.count,
+        s3Path: entry.s3Path,
+        cursorField: null,
+        cursorValue: null,
+      });
+    }
+  }
+
   return {
     clientConnector: state.client_connector,
-    lastSyncTimestamp: state.last_sync_timestamp,
+    lastSyncTimestamp: state.last_sync,
     lastExecutionStatus: state.last_execution_status,
-    syncConfig: state.sync_config,
+    totalRecords: state.sync_stats?.total_records ?? null,
+    executionDuration: state.sync_stats?.execution_duration ?? null,
+    streams,
   };
 }
 

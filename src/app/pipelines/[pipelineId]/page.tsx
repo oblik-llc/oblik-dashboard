@@ -1,0 +1,83 @@
+"use client";
+
+import { useParams } from "next/navigation";
+import { AlertCircle, ArrowLeft, RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { usePipeline } from "@/hooks/use-pipeline";
+import { PipelineHeader } from "@/components/pipeline/pipeline-header";
+import { SyncStatePanel } from "@/components/pipeline/sync-state-panel";
+import { StreamTable } from "@/components/pipeline/stream-table";
+import { RecentExecutions } from "@/components/pipeline/recent-executions";
+import Link from "next/link";
+
+function DetailSkeleton() {
+  return (
+    <div className="space-y-6">
+      <div className="space-y-3">
+        <Skeleton className="h-8 w-64" />
+        <Skeleton className="h-4 w-96" />
+      </div>
+      <Skeleton className="h-32 w-full" />
+      <Skeleton className="h-48 w-full" />
+      <Skeleton className="h-64 w-full" />
+    </div>
+  );
+}
+
+export default function PipelineDetailPage() {
+  const params = useParams<{ pipelineId: string }>();
+  const pipelineId = decodeURIComponent(params.pipelineId);
+  const { pipeline, isLoading, error, mutate } = usePipeline(pipelineId);
+
+  return (
+    <div className="mx-auto max-w-7xl space-y-6 p-6">
+      <Link
+        href="/"
+        className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-sm"
+      >
+        <ArrowLeft className="size-4" />
+        Back to Pipelines
+      </Link>
+
+      {error ? (
+        <div className="flex flex-col items-center gap-4 rounded-lg border border-red-200 bg-red-50 p-8 text-center">
+          <AlertCircle className="size-8 text-red-500" />
+          <div>
+            <p className="font-medium text-red-800">
+              Failed to load pipeline
+            </p>
+            <p className="text-sm text-red-600">
+              {error.message || "An unexpected error occurred."}
+            </p>
+          </div>
+          <Button variant="outline" size="sm" onClick={() => mutate()}>
+            <RefreshCw className="size-4" />
+            Retry
+          </Button>
+        </div>
+      ) : isLoading ? (
+        <DetailSkeleton />
+      ) : !pipeline ? (
+        <div className="flex flex-col items-center gap-2 rounded-lg border p-8 text-center text-muted-foreground">
+          <p className="font-medium">Pipeline not found</p>
+          <p className="text-sm">
+            This pipeline may have been removed or you don&apos;t have access.
+          </p>
+        </div>
+      ) : (
+        <>
+          <PipelineHeader pipeline={pipeline} />
+          <SyncStatePanel syncState={pipeline.syncState} />
+          {pipeline.syncState && (
+            <StreamTable streams={pipeline.syncState.streams} />
+          )}
+          <RecentExecutions
+            executions={pipeline.recentExecutions}
+            pipelineId={pipeline.pipelineId}
+          />
+        </>
+      )}
+    </div>
+  );
+}

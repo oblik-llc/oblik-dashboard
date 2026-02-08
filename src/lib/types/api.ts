@@ -1,5 +1,3 @@
-import type { SyncConfig } from "./pipeline";
-
 // ── Common ──
 
 export type PipelineStatus = "healthy" | "failing" | "running" | "unknown";
@@ -45,11 +43,21 @@ export interface ExecutionSummaryResponse {
   stopDate: string | null;
 }
 
+export interface StreamSummary {
+  name: string;
+  recordCount: number | null;
+  s3Path: string | null;
+  cursorField: string | null;
+  cursorValue: string | null;
+}
+
 export interface SyncStateResponse {
   clientConnector: string;
   lastSyncTimestamp: string;
   lastExecutionStatus: string;
-  syncConfig: SyncConfig;
+  totalRecords: number | null;
+  executionDuration: number | null;
+  streams: StreamSummary[];
 }
 
 export interface MetricDataPointResponse {
