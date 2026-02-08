@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { AlertCircle, ArrowLeft, RefreshCw } from "lucide-react";
+import { AlertCircle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePipeline } from "@/hooks/use-pipeline";
@@ -9,7 +9,6 @@ import { PipelineHeader } from "@/components/pipeline/pipeline-header";
 import { SyncStatePanel } from "@/components/pipeline/sync-state-panel";
 import { StreamTable } from "@/components/pipeline/stream-table";
 import { RecentExecutions } from "@/components/pipeline/recent-executions";
-import Link from "next/link";
 
 function DetailSkeleton() {
   return (
@@ -32,14 +31,6 @@ export default function PipelineDetailPage() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6">
-      <Link
-        href="/"
-        className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-sm"
-      >
-        <ArrowLeft className="size-4" />
-        Back to Pipelines
-      </Link>
-
       {error ? (
         <div className="flex flex-col items-center gap-4 rounded-lg border border-red-200 bg-red-50 p-8 text-center">
           <AlertCircle className="size-8 text-red-500" />
