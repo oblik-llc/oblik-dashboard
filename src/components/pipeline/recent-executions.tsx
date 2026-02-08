@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { CheckCircle2, XCircle, Loader2 } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -18,41 +17,15 @@ import {
 } from "@/components/ui/table";
 import { formatDistanceToNow } from "date-fns";
 import type { ExecutionSummaryResponse } from "@/lib/types/api";
+import {
+  StatusIcon,
+  formatDuration,
+  executionIdFromArn,
+} from "@/components/pipeline/execution-helpers";
 
 interface RecentExecutionsProps {
   executions: ExecutionSummaryResponse[];
   pipelineId: string;
-}
-
-function StatusIcon({ status }: { status: string }) {
-  switch (status) {
-    case "SUCCEEDED":
-      return <CheckCircle2 className="size-4 text-emerald-500" />;
-    case "FAILED":
-    case "TIMED_OUT":
-    case "ABORTED":
-      return <XCircle className="size-4 text-red-500" />;
-    case "RUNNING":
-      return <Loader2 className="size-4 animate-spin text-blue-500" />;
-    default:
-      return <div className="size-4 rounded-full bg-zinc-300" />;
-  }
-}
-
-function formatDuration(start: string, stop: string | null): string {
-  if (!stop) return "Running...";
-  const ms = new Date(stop).getTime() - new Date(start).getTime();
-  const seconds = Math.round(ms / 1000);
-  if (seconds < 60) return `${seconds}s`;
-  const mins = Math.floor(seconds / 60);
-  const secs = seconds % 60;
-  return secs > 0 ? `${mins}m ${secs}s` : `${mins}m`;
-}
-
-// Extract execution ID from ARN (last segment after the last colon)
-function executionIdFromArn(arn: string): string {
-  const parts = arn.split(":");
-  return parts[parts.length - 1];
 }
 
 export function RecentExecutions({
@@ -76,8 +49,14 @@ export function RecentExecutions({
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Recent Executions</CardTitle>
+        <Link
+          href={`/pipelines/${encodeURIComponent(pipelineId)}/executions`}
+          className="text-sm text-blue-600 hover:underline"
+        >
+          View all executions
+        </Link>
       </CardHeader>
       <CardContent>
         <Table>
