@@ -50,6 +50,10 @@ See `.env.local.example` for all required variables. Key ones:
 - When starting work on a new GitHub issue, always create a feature branch first (e.g., `feat/issue-12-pipeline-detail`) and open a PR against `main` when done.
 - Do not commit directly to `main` for issue work.
 
+## Frontend Design
+
+- Always use the `/frontend-design` skill when building or modifying UI components and pages. This ensures consistent, high-quality design across the dashboard.
+
 ## Architecture Notes
 
 - **Pipeline registry** lives in a DynamoDB table (`oblik-pipeline-registry`)
