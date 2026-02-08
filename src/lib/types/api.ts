@@ -33,6 +33,13 @@ export interface PipelinesListResponse {
   pipelines: PipelineOverview[];
 }
 
+// ── Executions list endpoint ──
+
+export interface ExecutionsListResponse {
+  executions: ExecutionSummaryResponse[];
+  nextToken: string | null;
+}
+
 // ── Detail endpoint ──
 
 export interface ExecutionSummaryResponse {
