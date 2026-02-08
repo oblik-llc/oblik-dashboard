@@ -14,6 +14,54 @@ import {
 export function BreadcrumbNav() {
   const pathname = usePathname();
 
+  // /pipelines/[id]/executions/[executionId] → Pipelines > id > Executions > executionId
+  const executionDetailMatch = pathname.match(
+    /^\/pipelines\/([^/]+)\/executions\/([^/]+)$/
+  );
+
+  if (executionDetailMatch) {
+    const pipelineId = decodeURIComponent(executionDetailMatch[1]);
+    const executionId = decodeURIComponent(executionDetailMatch[2]);
+    const truncatedId =
+      executionId.length > 24
+        ? executionId.slice(0, 12) + "..." + executionId.slice(-8)
+        : executionId;
+
+    return (
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Link href="/">Pipelines</Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Link href={`/pipelines/${encodeURIComponent(pipelineId)}`}>
+                {pipelineId}
+              </Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Link
+                href={`/pipelines/${encodeURIComponent(pipelineId)}/executions`}
+              >
+                Executions
+              </Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage title={executionId}>{truncatedId}</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+    );
+  }
+
   // /pipelines/[id]/executions → ["Pipelines", decoded id, "Executions"]
   const executionsMatch = pathname.match(
     /^\/pipelines\/([^/]+)\/executions$/
