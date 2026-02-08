@@ -4,6 +4,9 @@ import "./globals.css";
 
 import { auth } from "@/lib/auth/config";
 import SessionProvider from "@/components/providers/session-provider";
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/layout/app-sidebar";
+import { AppHeader } from "@/components/layout/app-header";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,7 +35,15 @@ export default async function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <SessionProvider session={session}>{children}</SessionProvider>
+        <SessionProvider session={session}>
+          <SidebarProvider>
+            <AppSidebar />
+            <SidebarInset>
+              <AppHeader />
+              <main className="flex-1">{children}</main>
+            </SidebarInset>
+          </SidebarProvider>
+        </SessionProvider>
       </body>
     </html>
   );
