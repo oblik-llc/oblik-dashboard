@@ -79,6 +79,33 @@ export interface PipelineMetricsResponse {
   executionTime: MetricDataPointResponse[];
 }
 
+// ── Execution detail endpoint ──
+
+export interface ExecutionHistoryEventResponse {
+  id: number;
+  timestamp: string; // ISO 8601
+  type: string;
+  stateName?: string;
+  error?: string;
+  cause?: string;
+}
+
+export interface ExecutionDetailResponse {
+  executionArn: string;
+  name: string;
+  status: string;
+  startDate: string; // ISO 8601
+  stopDate: string | null;
+  input: string | null;
+  output: string | null;
+  error: string | null;
+  cause: string | null;
+  stateMachineArn: string;
+  history: ExecutionHistoryEventResponse[];
+}
+
+// ── Pipeline detail endpoint ──
+
 export interface PipelineDetailResponse {
   pipelineId: string;
   clientName: string;
