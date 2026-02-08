@@ -47,7 +47,7 @@ export function BreadcrumbNav() {
   }
 
   // /pipelines/[id] → ["Pipelines", decoded id]
-  const pipelineMatch = pathname.match(/^\/pipelines\/([^/]+)/);
+  const pipelineMatch = pathname.match(/^\/pipelines\/([^/]+)/)
 
   if (pipelineMatch) {
     const pipelineId = decodeURIComponent(pipelineMatch[1]);
