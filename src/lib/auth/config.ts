@@ -21,6 +21,7 @@ declare module "@auth/core/jwt" {
 }
 
 const config: NextAuthConfig = {
+  secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
   providers: [
     Cognito({
       clientId: process.env.COGNITO_CLIENT_ID,
@@ -28,6 +29,7 @@ const config: NextAuthConfig = {
       issuer: process.env.COGNITO_ISSUER,
     }),
   ],
+  trustHost: true,
   session: { strategy: "jwt" },
   callbacks: {
     jwt({ token, account, profile }) {
