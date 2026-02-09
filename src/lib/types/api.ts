@@ -104,6 +104,20 @@ export interface ExecutionDetailResponse {
   history: ExecutionHistoryEventResponse[];
 }
 
+// ── Logs endpoint ──
+
+export interface LogEventResponse {
+  timestamp: string; // ISO 8601
+  message: string;
+  ingestionTime: string | null;
+  eventId: string | null;
+}
+
+export interface LogsResponse {
+  events: LogEventResponse[];
+  nextToken: string | null;
+}
+
 // ── Pipeline detail endpoint ──
 
 export interface PipelineDetailResponse {
