@@ -1,6 +1,6 @@
 ---
 name: wrap-up
-description: End-of-session wrap-up that updates GitHub issues with progress and next steps, updates plan files, offers to commit uncommitted changes, and offers to create PRs. Use when the user says "wrap up", "let's wrap up", "end session", or invokes /wrap-up.
+description: End-of-session wrap-up that updates GitHub issues with progress and next steps, updates plan files, offers to commit uncommitted changes, offers to create PRs, and reflects on the session to update CLAUDE.md with useful learnings. Use when the user says "wrap up", "let's wrap up", "end session", or invokes /wrap-up.
 ---
 
 # Session Wrap-Up
@@ -96,7 +96,30 @@ If the current branch is not main/master AND has commits not in main:
 
 3. If yes, create the PR with a summary of all changes on the branch
 
-### Step 6: Final Summary
+### Step 6: Session Reflection & CLAUDE.md Update
+
+Reflect on the session and consider whether anything learned should be captured in `CLAUDE.md` for future sessions:
+
+1. Review what was built, patterns used, and any pain points encountered
+2. Consider updates to `CLAUDE.md` such as:
+   - New patterns or conventions established (e.g., a new component pattern, API route structure)
+   - Gotchas or lint rules that caused issues and how to handle them
+   - New project structure entries (new directories, file conventions)
+   - Architecture notes for new features or integrations
+   - Anything a future session would benefit from knowing upfront
+3. If there are updates worth making, show the proposed changes and ask the user using AskUserQuestion:
+   - Option 1: "Yes, update CLAUDE.md"
+   - Option 2: "No, skip"
+4. If yes, apply the edits to `CLAUDE.md`
+5. If no meaningful learnings to capture, skip this step silently
+
+**Guidelines:**
+- Keep `CLAUDE.md` concise — it's loaded every session, so avoid bloat
+- Only add information that would save time or prevent mistakes in future sessions
+- Update existing sections rather than always appending new ones
+- Don't add temporary or session-specific details (those belong in issue comments)
+
+### Step 7: Final Summary
 
 Provide a brief summary to the user:
 - What was updated (issues, plans, commits, PRs)
@@ -117,6 +140,9 @@ Committed 3 files: "Increase HubSpot connector memory to fix OOM errors"
 
 ### Pull Request
 Created PR #14: https://github.com/org/repo/pull/14
+
+### CLAUDE.md Updated
+Added ECS memory configuration note to Architecture Notes.
 
 ### Next Session
 - Monitor HubSpot sync for remaining 12 streams
