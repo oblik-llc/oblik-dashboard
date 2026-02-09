@@ -10,6 +10,7 @@ import {
   ChevronRight,
   Clock,
   ArrowLeft,
+  FileText,
 } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import { Button } from "@/components/ui/button";
@@ -252,6 +253,15 @@ export default function ExecutionDetailPage() {
               </div>
             </CardContent>
           </Card>
+
+          {/* View logs link */}
+          <Link
+            href={`/pipelines/${encodeURIComponent(pipelineId)}/logs?startTime=${encodeURIComponent(execution.startDate)}&endTime=${encodeURIComponent(execution.stopDate || new Date().toISOString())}`}
+            className="inline-flex items-center gap-2 text-sm text-blue-600 hover:underline"
+          >
+            <FileText className="size-4" />
+            View Logs for this Execution
+          </Link>
 
           {/* Error panel */}
           {(execution.status === "FAILED" ||

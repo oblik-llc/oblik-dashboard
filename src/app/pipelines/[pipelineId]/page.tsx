@@ -2,7 +2,7 @@
 
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { AlertCircle, RefreshCw, BarChart3 } from "lucide-react";
+import { AlertCircle, RefreshCw, BarChart3, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePipeline } from "@/hooks/use-pipeline";
@@ -68,13 +68,22 @@ export default function PipelineDetailPage() {
             executions={pipeline.recentExecutions}
             pipelineId={pipeline.pipelineId}
           />
-          <Link
-            href={`/pipelines/${encodeURIComponent(pipeline.pipelineId)}/metrics`}
-            className="inline-flex items-center gap-2 text-sm text-blue-600 hover:underline"
-          >
-            <BarChart3 className="size-4" />
-            View Metrics
-          </Link>
+          <div className="flex items-center gap-4">
+            <Link
+              href={`/pipelines/${encodeURIComponent(pipeline.pipelineId)}/metrics`}
+              className="inline-flex items-center gap-2 text-sm text-blue-600 hover:underline"
+            >
+              <BarChart3 className="size-4" />
+              View Metrics
+            </Link>
+            <Link
+              href={`/pipelines/${encodeURIComponent(pipeline.pipelineId)}/logs`}
+              className="inline-flex items-center gap-2 text-sm text-blue-600 hover:underline"
+            >
+              <FileText className="size-4" />
+              View Logs
+            </Link>
+          </div>
         </>
       )}
     </div>
