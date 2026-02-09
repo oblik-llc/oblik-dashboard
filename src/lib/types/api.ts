@@ -118,6 +118,14 @@ export interface LogsResponse {
   nextToken: string | null;
 }
 
+// ── Trigger sync endpoint ──
+
+export interface TriggerSyncResponse {
+  executionArn: string;
+  executionName: string;
+  startDate: string; // ISO 8601
+}
+
 // ── Pipeline detail endpoint ──
 
 export interface PipelineDetailResponse {

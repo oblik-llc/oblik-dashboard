@@ -2,6 +2,7 @@ import {
   ListExecutionsCommand,
   DescribeExecutionCommand,
   GetExecutionHistoryCommand,
+  StartExecutionCommand,
 } from "@aws-sdk/client-sfn";
 import type { HistoryEvent } from "@aws-sdk/client-sfn";
 import { getSFNClient } from "./client";
@@ -121,6 +122,40 @@ function flattenHistoryEvent(ev: HistoryEvent): ExecutionHistoryEvent {
   }
 
   return event;
+}
+
+export interface StartExecutionInput {
+  stateMachineArn: string;
+  name: string;
+  input: string;
+}
+
+export interface StartExecutionResult {
+  executionArn: string;
+  startDate: Date;
+}
+
+export async function startExecution(
+  params: StartExecutionInput
+): Promise<StartExecutionResult> {
+  const client = getSFNClient();
+
+  try {
+    const result = await client.send(
+      new StartExecutionCommand({
+        stateMachineArn: params.stateMachineArn,
+        name: params.name,
+        input: params.input,
+      })
+    );
+
+    return {
+      executionArn: result.executionArn!,
+      startDate: result.startDate!,
+    };
+  } catch (error) {
+    throw new AwsServiceError("StepFunctions", "StartExecution", error);
+  }
 }
 
 export async function isCurrentlyRunning(

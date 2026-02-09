@@ -7,6 +7,10 @@ import type { PipelineStatus, LastSyncSummary } from "@/lib/types/api";
 
 // ── Auth helpers ──
 
+export function isAdmin(groups: string[]): boolean {
+  return groups.includes("Admin");
+}
+
 interface AuthResult {
   session: Session;
   errorResponse?: never;
