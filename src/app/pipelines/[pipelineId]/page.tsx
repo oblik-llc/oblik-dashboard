@@ -1,6 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { AlertCircle, RefreshCw, BarChart3, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -29,6 +30,8 @@ export default function PipelineDetailPage() {
   const params = useParams<{ pipelineId: string }>();
   const pipelineId = decodeURIComponent(params.pipelineId);
   const { pipeline, isLoading, error, mutate } = usePipeline(pipelineId);
+  const { data: session } = useSession();
+  const isAdmin = session?.user?.groups?.includes("Admin") ?? false;
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6">
@@ -59,7 +62,7 @@ export default function PipelineDetailPage() {
         </div>
       ) : (
         <>
-          <PipelineHeader pipeline={pipeline} />
+          <PipelineHeader pipeline={pipeline} isAdmin={isAdmin} onTriggered={() => mutate()} />
           <SyncStatePanel syncState={pipeline.syncState} />
           {pipeline.syncState && (
             <StreamTable streams={pipeline.syncState.streams} />
