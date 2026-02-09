@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import {
   Card,
   CardContent,
@@ -18,9 +19,10 @@ import type { StreamSummary } from "@/lib/types/api";
 
 interface StreamTableProps {
   streams: StreamSummary[];
+  pipelineId: string;
 }
 
-export function StreamTable({ streams }: StreamTableProps) {
+export function StreamTable({ streams, pipelineId }: StreamTableProps) {
   if (streams.length === 0) {
     return (
       <Card>
@@ -38,8 +40,14 @@ export function StreamTable({ streams }: StreamTableProps) {
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Streams</CardTitle>
+        <Link
+          href={`/pipelines/${encodeURIComponent(pipelineId)}/streams`}
+          className="text-sm text-blue-600 hover:underline"
+        >
+          View all
+        </Link>
       </CardHeader>
       <CardContent>
         <Table>

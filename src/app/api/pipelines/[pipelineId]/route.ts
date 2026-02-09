@@ -178,12 +178,24 @@ function serializeSyncState(state: SyncState): SyncStateResponse {
       const cursorField = cursorKeys[0] ?? null;
       const cursorValue = cursorField ? String(stateObj[cursorField]) : null;
 
+      // Determine sync mode: incremental if a real cursor field exists
+      const syncMode = cursorField ? "incremental" : "full_refresh";
+
+      // Include full stream state (excluding internal markers)
+      const filteredState = Object.fromEntries(
+        Object.entries(stateObj).filter(
+          ([k]) => k !== "__ab_no_cursor_state_message"
+        )
+      );
+
       streams.push({
         name,
         recordCount: statsEntry?.count ?? null,
         s3Path: statsEntry?.s3Path ?? null,
         cursorField,
         cursorValue,
+        syncMode,
+        streamState: Object.keys(filteredState).length > 0 ? filteredState : null,
       });
     }
   }
@@ -197,6 +209,8 @@ function serializeSyncState(state: SyncState): SyncStateResponse {
         s3Path: entry.s3Path,
         cursorField: null,
         cursorValue: null,
+        syncMode: "full_refresh",
+        streamState: null,
       });
     }
   }
