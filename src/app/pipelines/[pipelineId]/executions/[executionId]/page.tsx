@@ -4,15 +4,12 @@ import { useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import {
-  AlertCircle,
-  RefreshCw,
   ChevronDown,
   ChevronRight,
   Clock,
   ArrowLeft,
 } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -20,7 +17,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
+import { ErrorState } from "@/components/ui/error-state";
+import { ExecutionDetailSkeleton } from "@/components/loading/execution-detail-skeleton";
 import { useExecutionDetail } from "@/hooks/use-execution-detail";
 import {
   StatusIcon,
@@ -82,16 +80,6 @@ function CollapsibleJson({
         </CardContent>
       )}
     </Card>
-  );
-}
-
-function DetailSkeleton() {
-  return (
-    <div className="space-y-6">
-      <Skeleton className="h-24 w-full" />
-      <Skeleton className="h-48 w-full" />
-      <Skeleton className="h-64 w-full" />
-    </div>
   );
 }
 
@@ -179,23 +167,13 @@ export default function ExecutionDetailPage() {
       </Link>
 
       {error ? (
-        <div className="flex flex-col items-center gap-4 rounded-lg border border-red-200 bg-red-50 p-8 text-center">
-          <AlertCircle className="size-8 text-red-500" />
-          <div>
-            <p className="font-medium text-red-800">
-              Failed to load execution
-            </p>
-            <p className="text-sm text-red-600">
-              {error.message || "An unexpected error occurred."}
-            </p>
-          </div>
-          <Button variant="outline" size="sm" onClick={() => mutate()}>
-            <RefreshCw className="size-4" />
-            Retry
-          </Button>
-        </div>
+        <ErrorState
+          title="Failed to load execution"
+          message={error.message || "An unexpected error occurred."}
+          onRetry={() => mutate()}
+        />
       ) : isLoading || !execution ? (
-        <DetailSkeleton />
+        <ExecutionDetailSkeleton />
       ) : (
         <div className="space-y-6">
           {/* Header */}

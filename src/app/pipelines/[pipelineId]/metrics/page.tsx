@@ -3,9 +3,9 @@
 import { useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { AlertCircle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
+import { ErrorState } from "@/components/ui/error-state";
+import { MetricsSkeleton } from "@/components/loading/metrics-skeleton";
 import { useMetrics, type MetricsPagePeriod } from "@/hooks/use-metrics";
 import { SuccessRateChart } from "@/components/metrics/SuccessRateChart";
 import { DurationChart } from "@/components/metrics/DurationChart";
@@ -14,15 +14,6 @@ const PERIODS: { value: MetricsPagePeriod; label: string }[] = [
   { value: "7d", label: "7 days" },
   { value: "30d", label: "30 days" },
 ];
-
-function MetricsSkeleton() {
-  return (
-    <div className="space-y-6">
-      <Skeleton className="h-80 w-full rounded-xl" />
-      <Skeleton className="h-80 w-full rounded-xl" />
-    </div>
-  );
-}
 
 export default function MetricsPage() {
   const params = useParams<{ pipelineId: string }>();
@@ -60,19 +51,11 @@ export default function MetricsPage() {
       </div>
 
       {error ? (
-        <div className="flex flex-col items-center gap-4 rounded-lg border border-red-200 bg-red-50 p-8 text-center">
-          <AlertCircle className="size-8 text-red-500" />
-          <div>
-            <p className="font-medium text-red-800">Failed to load metrics</p>
-            <p className="text-sm text-red-600">
-              {error.message || "An unexpected error occurred."}
-            </p>
-          </div>
-          <Button variant="outline" size="sm" onClick={() => mutate()}>
-            <RefreshCw className="size-4" />
-            Retry
-          </Button>
-        </div>
+        <ErrorState
+          title="Failed to load metrics"
+          message={error.message || "An unexpected error occurred."}
+          onRetry={() => mutate()}
+        />
       ) : isLoading ? (
         <MetricsSkeleton />
       ) : data ? (

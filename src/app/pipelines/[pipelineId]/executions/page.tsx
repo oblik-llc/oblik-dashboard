@@ -3,7 +3,7 @@
 import { useState, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { AlertCircle, RefreshCw, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,7 +20,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Skeleton } from "@/components/ui/skeleton";
+import { ErrorState } from "@/components/ui/error-state";
+import { EmptyState } from "@/components/ui/empty-state";
+import { ExecutionsSkeleton } from "@/components/loading/executions-skeleton";
 import { useExecutions } from "@/hooks/use-executions";
 import {
   StatusIcon,
@@ -37,16 +39,6 @@ const STATUS_OPTIONS = [
   { value: "TIMED_OUT", label: "Timed Out" },
   { value: "ABORTED", label: "Aborted" },
 ] as const;
-
-function ExecutionsSkeleton() {
-  return (
-    <div className="space-y-3">
-      {Array.from({ length: 5 }).map((_, i) => (
-        <Skeleton key={i} className="h-12 w-full" />
-      ))}
-    </div>
-  );
-}
 
 export default function ExecutionHistoryPage() {
   const params = useParams<{ pipelineId: string }>();
@@ -122,32 +114,22 @@ export default function ExecutionHistoryPage() {
         </CardHeader>
         <CardContent>
           {error ? (
-            <div className="flex flex-col items-center gap-4 rounded-lg border border-red-200 bg-red-50 p-8 text-center">
-              <AlertCircle className="size-8 text-red-500" />
-              <div>
-                <p className="font-medium text-red-800">
-                  Failed to load executions
-                </p>
-                <p className="text-sm text-red-600">
-                  {error.message || "An unexpected error occurred."}
-                </p>
-              </div>
-              <Button variant="outline" size="sm" onClick={() => mutate()}>
-                <RefreshCw className="size-4" />
-                Retry
-              </Button>
-            </div>
+            <ErrorState
+              title="Failed to load executions"
+              message={error.message || "An unexpected error occurred."}
+              onRetry={() => mutate()}
+            />
           ) : isLoading && accumulated.length === 0 ? (
             <ExecutionsSkeleton />
           ) : executions.length === 0 ? (
-            <div className="flex flex-col items-center gap-2 rounded-lg border p-8 text-center text-muted-foreground">
-              <p className="font-medium">No executions found</p>
-              <p className="text-sm">
-                {statusFilter
+            <EmptyState
+              title="No executions found"
+              description={
+                statusFilter
                   ? "Try changing the status filter."
-                  : "This pipeline has no execution history yet."}
-              </p>
-            </div>
+                  : "This pipeline has no execution history yet."
+              }
+            />
           ) : (
             <>
               <Table>
