@@ -63,3 +63,6 @@ See `.env.local.example` for all required variables. Key ones:
 - **Auth flow:** NextAuth middleware → Cognito hosted UI → JWT session cookie
 - **Multi-tenant:** Cognito user groups (`client:{name}`) filter pipeline visibility
 - **Auto-refresh:** SWR polling (30s overview, 15s detail, 5s running executions)
+- **Admin authorization:** Explicit `"Admin"` Cognito group check via `isAdmin()` in `src/lib/api/helpers.ts`. Used for write actions (not the implicit "no client groups" pattern used for read filtering).
+- **Write-action API pattern:** Auth → admin check (403) → fetch resource (404) → multi-tenant check (404) → business logic guards (400/409) → rate limit (429) → execute → return 201. See `trigger/route.ts` as reference.
+- **Manual trigger:** Embeds audit info (`triggeredBy`, `triggeredAt`, `source`) in SFN execution input. Execution name format: `manual-{timestamp}-{uuid8}`.
