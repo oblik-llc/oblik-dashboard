@@ -3,7 +3,7 @@
 import { useParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { AlertCircle, RefreshCw, BarChart3, FileText, Database } from "lucide-react";
+import { AlertCircle, RefreshCw, BarChart3, FileText, Database, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePipeline } from "@/hooks/use-pipeline";
@@ -93,6 +93,15 @@ export default function PipelineDetailPage() {
               <FileText className="size-4" />
               View Logs
             </Link>
+            {isAdmin && (
+              <Link
+                href={`/pipelines/${encodeURIComponent(pipeline.pipelineId)}/alerts`}
+                className="inline-flex items-center gap-2 text-sm text-blue-600 hover:underline"
+              >
+                <Bell className="size-4" />
+                Alert Settings
+              </Link>
+            )}
           </div>
         </>
       )}

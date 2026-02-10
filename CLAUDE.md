@@ -9,7 +9,7 @@ Pipeline monitoring dashboard for Oblik data ingestion.
 - **Data Fetching:** SWR (with polling intervals)
 - **Charts:** Recharts
 - **Auth:** NextAuth v5 (Auth.js) with AWS Cognito provider
-- **Cloud:** AWS SDK v3 (DynamoDB, Step Functions, CloudWatch, CloudWatch Logs)
+- **Cloud:** AWS SDK v3 (DynamoDB, Step Functions, CloudWatch, CloudWatch Logs, SNS)
 - **Deployment:** AWS Amplify Hosting
 - **Icons:** lucide-react
 - **Dates:** date-fns
@@ -77,3 +77,5 @@ See `.env.local.example` for all required variables. Key ones:
 - **Admin authorization:** Explicit `"Admin"` Cognito group check via `isAdmin()` in `src/lib/api/helpers.ts`. Used for write actions (not the implicit "no client groups" pattern used for read filtering).
 - **Write-action API pattern:** Auth → admin check (403) → fetch resource (404) → multi-tenant check (404) → business logic guards (400/409) → rate limit (429) → execute → return 201. See `trigger/route.ts` as reference.
 - **Manual trigger:** Embeds audit info (`triggeredBy`, `triggeredAt`, `source`) in SFN execution input. Execution name format: `manual-{timestamp}-{uuid8}`.
+- **Alerting:** DynamoDB tables `oblik-alert-preferences` (per-pipeline config) and `oblik-alert-history` (with 90-day TTL). Delivers via SNS email and Slack webhooks. Evaluation logic in `alerts-evaluate.ts` handles failure, consecutive failures, and recovery detection with 5-min rate limiting.
+- **API key auth pattern:** For endpoints called by AWS services (not users), use `x-api-key` header auth instead of Cognito. Add the path to `middleware.ts` matcher exclusion list (e.g., `api/alerts/evaluate`).
