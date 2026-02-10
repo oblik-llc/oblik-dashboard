@@ -56,6 +56,8 @@ export interface StreamSummary {
   s3Path: string | null;
   cursorField: string | null;
   cursorValue: string | null;
+  syncMode: "incremental" | "full_refresh";
+  streamState: Record<string, unknown> | null;
 }
 
 export interface SyncStateResponse {

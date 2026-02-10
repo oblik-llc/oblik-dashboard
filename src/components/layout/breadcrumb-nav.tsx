@@ -158,6 +158,38 @@ export function BreadcrumbNav() {
     );
   }
 
+  // /pipelines/[id]/streams → Pipelines > id > Streams
+  const streamsMatch = pathname.match(
+    /^\/pipelines\/([^/]+)\/streams$/
+  );
+
+  if (streamsMatch) {
+    const pipelineId = decodeURIComponent(streamsMatch[1]);
+    return (
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Link href="/">Pipelines</Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Link href={`/pipelines/${encodeURIComponent(pipelineId)}`}>
+                {pipelineId}
+              </Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>Streams</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+    );
+  }
+
   // /pipelines/[id] → ["Pipelines", decoded id]
   const pipelineMatch = pathname.match(/^\/pipelines\/([^/]+)/)
 
