@@ -158,6 +158,33 @@ export async function startExecution(
   }
 }
 
+export async function describeExecution(
+  executionArn: string
+): Promise<ExecutionDetail> {
+  const client = getSFNClient();
+
+  try {
+    const result = await client.send(
+      new DescribeExecutionCommand({ executionArn })
+    );
+
+    return {
+      executionArn: result.executionArn!,
+      name: result.name!,
+      status: result.status!,
+      startDate: result.startDate!,
+      stopDate: result.stopDate,
+      input: result.input,
+      output: result.output,
+      error: result.error,
+      cause: result.cause,
+      stateMachineArn: result.stateMachineArn!,
+    };
+  } catch (error) {
+    throw new AwsServiceError("StepFunctions", "DescribeExecution", error);
+  }
+}
+
 export async function isCurrentlyRunning(
   stateMachineArn: string
 ): Promise<boolean> {

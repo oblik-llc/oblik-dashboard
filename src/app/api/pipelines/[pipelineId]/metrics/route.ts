@@ -9,7 +9,7 @@ import {
 import type { MetricPeriod, MetricDataPoint } from "@/lib/types/pipeline";
 import type { PipelineMetricsResponse, MetricDataPointResponse } from "@/lib/types/api";
 
-const VALID_PERIODS = new Set<MetricPeriod>(["7d", "30d"]);
+const VALID_PERIODS = new Set<MetricPeriod>(["1h", "6h", "24h", "7d", "30d"]);
 
 export async function GET(
   request: Request,

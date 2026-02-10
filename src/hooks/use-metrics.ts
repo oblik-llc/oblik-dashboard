@@ -1,9 +1,10 @@
 import useSWR from "swr";
 import type { PipelineMetricsResponse } from "@/lib/types/api";
+import type { MetricPeriod } from "@/lib/types/pipeline";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
-export type MetricsPagePeriod = "7d" | "30d";
+export type MetricsPagePeriod = MetricPeriod;
 
 export function useMetrics(pipelineId: string, period: MetricsPagePeriod) {
   const url = `/api/pipelines/${encodeURIComponent(pipelineId)}/metrics?period=${period}`;
