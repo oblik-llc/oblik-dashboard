@@ -143,6 +143,52 @@ export interface TriggerSyncResponse {
   startDate: string; // ISO 8601
 }
 
+// ── Alert preferences endpoint ──
+
+export interface AlertPreferencesResponse {
+  pipelineId: string;
+  enabled: boolean;
+  channels: {
+    email: { enabled: boolean };
+    slack: { enabled: boolean; webhookUrl: string | null; isConfigured: boolean };
+  };
+  triggers: {
+    onFailure: boolean;
+    onConsecutiveFailures: { enabled: boolean; threshold: number };
+    onRecovery: boolean;
+  };
+}
+
+export interface AlertPreferencesUpdateRequest {
+  enabled: boolean;
+  channels: {
+    email: { enabled: boolean };
+    slack: { enabled: boolean; webhookUrl?: string };
+  };
+  triggers: {
+    onFailure: boolean;
+    onConsecutiveFailures: { enabled: boolean; threshold: number };
+    onRecovery: boolean;
+  };
+}
+
+export interface AlertHistoryEntryResponse {
+  sentAt: string;
+  alertType: string;
+  channel: string;
+  success: boolean;
+  errorMessage?: string;
+  message: string;
+}
+
+export interface AlertHistoryResponse {
+  entries: AlertHistoryEntryResponse[];
+}
+
+export interface TestAlertResponse {
+  results: { channel: string; success: boolean; error?: string }[];
+}
+
 // ── Pipeline detail endpoint ──
 
 export interface PipelineDetailResponse {
