@@ -120,6 +120,21 @@ export interface LogsResponse {
   nextToken: string | null;
 }
 
+// ── Execution records endpoint ──
+
+export interface ExecutionRecordDataPoint {
+  executionName: string;
+  startDate: string; // ISO 8601
+  stopDate: string | null;
+  status: string;
+  recordCount: number | null;
+  durationSeconds: number | null;
+}
+
+export interface ExecutionRecordsResponse {
+  dataPoints: ExecutionRecordDataPoint[];
+}
+
 // ── Trigger sync endpoint ──
 
 export interface TriggerSyncResponse {
