@@ -54,6 +54,17 @@ See `.env.local.example` for all required variables. Key ones:
 
 - Always use the `/frontend-design` skill when building or modifying UI components and pages. This ensures consistent, high-quality design across the dashboard.
 
+## Shared Utilities (`src/lib/`)
+
+- **`format.ts`** — Duration formatting (`formatDurationMs`, `formatYAxisDuration`). Use these instead of defining local formatters in chart components.
+- **`stats.ts`** — `percentile()` with linear interpolation.
+- **`csv.ts`** — `downloadCsv()` for client-side CSV export with comma/quote escaping.
+
+## Recharts Gotchas
+
+- The `Legend` component does **not** accept a `payload` prop in the version used here. Use a custom HTML legend (e.g., inline `<span>` elements) instead of passing custom `payload` to `<Legend>`.
+- Tooltip `formatter` signature: use `(value?: number | string)` — the `name` param can be `undefined`, so avoid typing it as `string`.
+
 ## Architecture Notes
 
 - **Pipeline registry** lives in a DynamoDB table (`oblik-pipeline-registry`)
