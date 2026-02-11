@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { GitBranch } from "lucide-react";
+import { GitBranch, BarChart3 } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -21,6 +21,11 @@ const navItems = [
     title: "Pipelines",
     url: "/",
     icon: GitBranch,
+  },
+  {
+    title: "Analytics",
+    url: "/analytics",
+    icon: BarChart3,
   },
 ];
 
@@ -56,7 +61,7 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
                 const isActive =
                   item.url === "/"
                     ? pathname === "/" || pathname.startsWith("/pipelines")
-                    : pathname.startsWith(item.url);
+                    : pathname === item.url || pathname.startsWith(item.url + "/");
 
                 return (
                   <SidebarMenuItem key={item.title}>

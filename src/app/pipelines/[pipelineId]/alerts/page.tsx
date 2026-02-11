@@ -47,6 +47,7 @@ export default function AlertsPage() {
   const [consecutiveEnabled, setConsecutiveEnabled] = useState(false);
   const [consecutiveThreshold, setConsecutiveThreshold] = useState(3);
   const [onRecovery, setOnRecovery] = useState(true);
+  const [onSLABreach, setOnSLABreach] = useState(false);
 
   const [saving, setSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
@@ -63,6 +64,7 @@ export default function AlertsPage() {
       setConsecutiveEnabled(preferences.triggers.onConsecutiveFailures.enabled);
       setConsecutiveThreshold(preferences.triggers.onConsecutiveFailures.threshold);
       setOnRecovery(preferences.triggers.onRecovery);
+      setOnSLABreach(preferences.triggers.onSLABreach?.enabled ?? false);
       // Don't overwrite webhook URL if user has been editing it
       if (!webhookChanged) {
         setWebhookUrl("");
@@ -113,6 +115,7 @@ export default function AlertsPage() {
           threshold: consecutiveThreshold,
         },
         onRecovery,
+        onSLABreach: { enabled: onSLABreach },
       },
     };
 
@@ -358,6 +361,21 @@ export default function AlertsPage() {
                     <Switch
                       checked={onRecovery}
                       onCheckedChange={setOnRecovery}
+                    />
+                  </div>
+
+                  <div className="border-t" />
+
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label>On SLA breach</Label>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        Alert when uptime or duration SLA thresholds are breached
+                      </p>
+                    </div>
+                    <Switch
+                      checked={onSLABreach}
+                      onCheckedChange={setOnSLABreach}
                     />
                   </div>
                 </CardContent>

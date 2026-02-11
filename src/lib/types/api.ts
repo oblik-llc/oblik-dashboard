@@ -156,6 +156,7 @@ export interface AlertPreferencesResponse {
     onFailure: boolean;
     onConsecutiveFailures: { enabled: boolean; threshold: number };
     onRecovery: boolean;
+    onSLABreach?: { enabled: boolean };
   };
 }
 
@@ -169,6 +170,7 @@ export interface AlertPreferencesUpdateRequest {
     onFailure: boolean;
     onConsecutiveFailures: { enabled: boolean; threshold: number };
     onRecovery: boolean;
+    onSLABreach?: { enabled: boolean };
   };
 }
 
@@ -187,6 +189,64 @@ export interface AlertHistoryResponse {
 
 export interface TestAlertResponse {
   results: { channel: string; success: boolean; error?: string }[];
+}
+
+// ── SLA config endpoint ──
+
+export interface SlaConfigResponse {
+  pipelineId: string;
+  enabled: boolean;
+  uptimeTargetPercent: number;
+  maxExecutionDurationSeconds: number;
+  freshnessWindowMinutes: number;
+}
+
+export interface SlaConfigUpdateRequest {
+  enabled: boolean;
+  uptimeTargetPercent: number;
+  maxExecutionDurationSeconds: number;
+  freshnessWindowMinutes: number;
+}
+
+// ── Analytics endpoint ──
+
+export type AnalyticsPeriod = "7d" | "30d" | "90d";
+
+export interface PipelineAnalyticsResponse {
+  pipelineId: string;
+  period: AnalyticsPeriod;
+  uptimePercent: number;
+  totalExecutions: number;
+  succeededCount: number;
+  failedCount: number;
+  totalRecordsSynced: number;
+  avgRecordsPerSync: number;
+  avgDurationSeconds: number;
+  p95DurationSeconds: number;
+  freshnessPercent: number | null;
+  executionsOverDurationSla: number;
+  slaConfig: SlaConfigResponse | null;
+}
+
+export interface AnalyticsSummaryPipeline {
+  pipelineId: string;
+  clientName: string;
+  uptimePercent: number;
+  freshnessPercent: number | null;
+  totalRecordsSynced: number;
+  totalExecutions: number;
+  slaCompliant: boolean;
+}
+
+export interface AnalyticsSummaryResponse {
+  pipelines: AnalyticsSummaryPipeline[];
+  totals: {
+    totalPipelines: number;
+    slaCompliantCount: number;
+    overallUptimePercent: number;
+    totalRecordsSynced: number;
+    totalExecutions: number;
+  };
 }
 
 // ── Pipeline detail endpoint ──

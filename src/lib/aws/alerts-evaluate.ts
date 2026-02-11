@@ -1,12 +1,14 @@
 import { getAlertPreferences, putAlertHistoryEntry, getLastAlertTime } from "./alerts-db";
 import { sendEmailAlert, sendSlackAlert } from "./alerts-delivery";
-import { listExecutions } from "./stepfunctions";
+import { listExecutions, describeExecution } from "./stepfunctions";
 import { getPipeline } from "./dynamodb";
+import { getSlaConfig } from "./sla-db";
 import type {
   AlertEvaluatePayload,
   AlertType,
   AlertChannel,
   AlertHistoryEntry,
+  AlertTriggers,
 } from "@/lib/types/alerts";
 
 const RATE_LIMIT_MS = 5 * 60 * 1000; // 5 minutes
@@ -25,6 +27,8 @@ export async function evaluateAlert(
 
   // Determine which alert types apply
   const alertTypes = await determineAlertTypes(
+    pipelineId,
+    executionArn,
     executionStatus,
     stateMachineArn,
     prefs.triggers
@@ -110,13 +114,11 @@ export async function evaluateAlert(
 }
 
 async function determineAlertTypes(
+  pipelineId: string,
+  executionArn: string,
   executionStatus: string,
   stateMachineArn: string,
-  triggers: {
-    onFailure: boolean;
-    onConsecutiveFailures: { enabled: boolean; threshold: number };
-    onRecovery: boolean;
-  }
+  triggers: AlertTriggers
 ): Promise<AlertType[]> {
   const alertTypes: AlertType[] = [];
   const isFailed = ["FAILED", "TIMED_OUT", "ABORTED"].includes(executionStatus);
@@ -145,7 +147,61 @@ async function determineAlertTypes(
     }
   }
 
+  // SLA breach check
+  if (triggers.onSLABreach?.enabled) {
+    const breached = await checkSLABreach(
+      pipelineId,
+      executionArn,
+      stateMachineArn
+    );
+    if (breached) {
+      alertTypes.push("sla_breach");
+    }
+  }
+
   return alertTypes;
+}
+
+async function checkSLABreach(
+  pipelineId: string,
+  executionArn: string,
+  stateMachineArn: string
+): Promise<boolean> {
+  try {
+    const slaConfig = await getSlaConfig(pipelineId);
+    if (!slaConfig?.enabled) return false;
+
+    // Check if current execution duration exceeds max
+    const detail = await describeExecution(executionArn);
+    if (detail.stopDate && detail.startDate) {
+      const durationSeconds =
+        (detail.stopDate.getTime() - detail.startDate.getTime()) / 1000;
+      if (durationSeconds > slaConfig.maxExecutionDurationSeconds) {
+        return true;
+      }
+    }
+
+    // Check recent uptime against target
+    const result = await listExecutions(stateMachineArn, { maxResults: 20 });
+    const completed = result.executions.filter((e) => e.status !== "RUNNING");
+    if (completed.length > 0) {
+      const succeeded = completed.filter(
+        (e) => e.status === "SUCCEEDED"
+      ).length;
+      const uptimePercent = (succeeded / completed.length) * 100;
+      if (uptimePercent < slaConfig.uptimeTargetPercent) {
+        return true;
+      }
+    }
+
+    return false;
+  } catch (error) {
+    console.error(
+      `[alerts] SLA breach check failed for ${pipelineId}:`,
+      error
+    );
+    return false;
+  }
 }
 
 async function countConsecutiveFailures(
@@ -193,5 +249,7 @@ function buildMessage(
       return `Pipeline *${pipelineId}* has multiple consecutive failures.\n\nLatest status: ${executionStatus}\nExecution: ${executionName}`;
     case "recovery":
       return `Pipeline *${pipelineId}* has recovered.\n\nStatus: ${executionStatus}\nExecution: ${executionName}`;
+    case "sla_breach":
+      return `Pipeline *${pipelineId}* has breached its SLA.\n\nStatus: ${executionStatus}\nExecution: ${executionName}\n\nCheck the Analytics page for details.`;
   }
 }
