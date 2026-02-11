@@ -14,6 +14,19 @@ import {
 export function BreadcrumbNav() {
   const pathname = usePathname();
 
+  // /admin/users → User Management
+  if (pathname === "/admin/users") {
+    return (
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbPage>User Management</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+    );
+  }
+
   // /pipelines/[id]/executions/[executionId] → Pipelines > id > Executions > executionId
   const executionDetailMatch = pathname.match(
     /^\/pipelines\/([^/]+)\/executions\/([^/]+)$/

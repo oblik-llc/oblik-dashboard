@@ -4,6 +4,7 @@ import { SFNClient } from "@aws-sdk/client-sfn";
 import { CloudWatchClient } from "@aws-sdk/client-cloudwatch";
 import { CloudWatchLogsClient } from "@aws-sdk/client-cloudwatch-logs";
 import { SNSClient } from "@aws-sdk/client-sns";
+import { CognitoIdentityProviderClient } from "@aws-sdk/client-cognito-identity-provider";
 
 const awsConfig = {
   region: process.env.OBLIK_AWS_REGION || process.env.AWS_REGION,
@@ -21,6 +22,7 @@ let sfnClient: SFNClient | null = null;
 let cloudWatchClient: CloudWatchClient | null = null;
 let cloudWatchLogsClient: CloudWatchLogsClient | null = null;
 let snsClient: SNSClient | null = null;
+let cognitoClient: CognitoIdentityProviderClient | null = null;
 
 export function getDynamoDBClient(): DynamoDBDocumentClient {
   if (!dynamoDBClient) {
@@ -58,4 +60,11 @@ export function getSNSClient(): SNSClient {
     snsClient = new SNSClient(awsConfig);
   }
   return snsClient;
+}
+
+export function getCognitoClient(): CognitoIdentityProviderClient {
+  if (!cognitoClient) {
+    cognitoClient = new CognitoIdentityProviderClient(awsConfig);
+  }
+  return cognitoClient;
 }
