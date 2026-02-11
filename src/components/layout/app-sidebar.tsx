@@ -2,13 +2,15 @@
 
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { GitBranch, BarChart3 } from "lucide-react";
+import { useSession } from "next-auth/react";
+import { GitBranch, BarChart3, Users } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -29,8 +31,18 @@ const navItems = [
   },
 ];
 
+const adminNavItems = [
+  {
+    title: "Users",
+    url: "/admin/users",
+    icon: Users,
+  },
+];
+
 export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
+  const { data: session } = useSession();
+  const isAdmin = session?.user?.groups?.includes("Admin") ?? false;
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -81,6 +93,35 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        {isAdmin && (
+          <SidebarGroup>
+            <SidebarGroupLabel>Admin</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {adminNavItems.map((item) => {
+                  const isActive =
+                    pathname === item.url || pathname.startsWith(item.url + "/");
+
+                  return (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={isActive}
+                        tooltip={item.title}
+                      >
+                        <Link href={item.url}>
+                          <item.icon />
+                          <span>{item.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
       </SidebarContent>
       <SidebarFooter>
         <SidebarUserNav />

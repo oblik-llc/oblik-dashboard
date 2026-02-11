@@ -249,6 +249,55 @@ export interface AnalyticsSummaryResponse {
   };
 }
 
+// ── User management endpoints ──
+
+export interface UserResponse {
+  username: string;
+  email: string;
+  status: string;
+  enabled: boolean;
+  createdAt: string;
+  lastModifiedAt: string;
+  groups: string[];
+  isAdmin: boolean;
+  clientGroups: string[];
+}
+
+export interface GroupResponse {
+  name: string;
+  description: string | null;
+}
+
+export interface UsersListResponse {
+  users: UserResponse[];
+  groups: GroupResponse[];
+}
+
+export interface InviteUserRequest {
+  username: string;
+  email: string;
+}
+
+export interface InviteUserResponse {
+  username: string;
+  email: string;
+  temporaryPassword: boolean;
+}
+
+export interface UpdateUserGroupsRequest {
+  addGroups?: string[];
+  removeGroups?: string[];
+}
+
+export interface UpdateUserGroupsResponse {
+  username: string;
+  groups: string[];
+}
+
+export interface UpdateUserStatusRequest {
+  enabled: boolean;
+}
+
 // ── Pipeline detail endpoint ──
 
 export interface PipelineDetailResponse {
