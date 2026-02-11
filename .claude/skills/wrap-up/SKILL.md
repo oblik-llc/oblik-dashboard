@@ -119,7 +119,36 @@ Reflect on the session and consider whether anything learned should be captured 
 - Update existing sections rather than always appending new ones
 - Don't add temporary or session-specific details (those belong in issue comments)
 
-### Step 7: Final Summary
+### Step 7: Recommend New Skills or Tools
+
+Review the session for scripts, commands, multi-step processes, or workflows that were run and could be useful in future sessions. Look for:
+
+1. **Repeated commands or patterns** — Bash commands or sequences that were run multiple times (e.g., credential refresh, build-and-deploy steps, data migration scripts)
+2. **Multi-step workflows** — Processes that required several coordinated steps to complete (e.g., "create DynamoDB table → set TTL → add env var → redeploy")
+3. **Project-specific conventions** — Patterns that encode domain knowledge a future session wouldn't know (e.g., how to test alerting, how to deploy to Amplify, how to set up a new pipeline)
+4. **External tool integrations** — AWS CLI commands, GitHub CLI workflows, or API calls that required specific flags or configurations
+
+For each candidate, consider:
+- Would a future session likely need to do this again?
+- Is it complex enough that encoding it as a skill saves meaningful time?
+- Does it require project-specific knowledge that isn't obvious?
+
+If there are recommendations:
+
+1. Present a summary of each recommended skill with:
+   - **Name**: Suggested skill name (lowercase, hyphens)
+   - **Purpose**: What it automates or simplifies
+   - **Trigger**: When a future session would use it
+   - **Example**: The key commands or steps it would encode
+2. Ask the user using AskUserQuestion:
+   - Option 1: "Yes, create recommended skills"
+   - Option 2: "Pick which ones to create" (if multiple)
+   - Option 3: "No, skip"
+3. If yes, use the `/skill-writer` skill to create each approved skill
+
+If no meaningful skill candidates are found, skip this step silently.
+
+### Step 8: Final Summary
 
 Provide a brief summary to the user:
 - What was updated (issues, plans, commits, PRs)
@@ -143,6 +172,9 @@ Created PR #14: https://github.com/org/repo/pull/14
 
 ### CLAUDE.md Updated
 Added ECS memory configuration note to Architecture Notes.
+
+### Recommended Skills
+Created `amplify-deploy` skill — automates the Amplify env var update + redeploy workflow.
 
 ### Next Session
 - Monitor HubSpot sync for remaining 12 streams
