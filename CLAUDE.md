@@ -9,7 +9,7 @@ Pipeline monitoring dashboard for Oblik data ingestion.
 - **Data Fetching:** SWR (with polling intervals)
 - **Charts:** Recharts
 - **Auth:** NextAuth v5 (Auth.js) with AWS Cognito provider
-- **Cloud:** AWS SDK v3 (DynamoDB, Step Functions, CloudWatch, CloudWatch Logs, SNS)
+- **Cloud:** AWS SDK v3 (DynamoDB, Step Functions, CloudWatch, CloudWatch Logs, SNS, Cognito Identity Provider)
 - **Deployment:** AWS Amplify Hosting
 - **Icons:** lucide-react
 - **Dates:** date-fns
@@ -19,13 +19,16 @@ Pipeline monitoring dashboard for Oblik data ingestion.
 ```
 src/
   app/                          # Next.js App Router pages
-    api/                        # API route handlers
-      auth/[...nextauth]/       # NextAuth endpoints
-      pipelines/                # Pipeline API routes
-  components/                   # React components
-    analytics/                  # Analytics stat cards, SLA compliance, freshness chart
-    layout/                     # Sidebar, Header, etc.
-    metrics/                    # Chart components
+    admin/                        # Admin pages (user management)
+    api/                          # API route handlers
+      auth/[...nextauth]/         # NextAuth endpoints
+      pipelines/                  # Pipeline API routes
+      users/                      # User management API routes
+  components/                     # React components
+    admin/                        # Admin UI (users table, invite/edit/delete dialogs)
+    analytics/                    # Analytics stat cards, SLA compliance, freshness chart
+    layout/                       # Sidebar, Header, etc.
+    metrics/                      # Chart components
   hooks/                        # Custom React hooks (SWR wrappers)
   lib/
     auth/                       # NextAuth configuration
@@ -44,7 +47,7 @@ src/
 See `.env.local.example` for all required variables. Key ones:
 - `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` / `AWS_REGION`
 - `NEXTAUTH_URL` / `NEXTAUTH_SECRET`
-- `COGNITO_CLIENT_ID` / `COGNITO_CLIENT_SECRET` / `COGNITO_ISSUER`
+- `COGNITO_CLIENT_ID` / `COGNITO_CLIENT_SECRET` / `COGNITO_ISSUER` / `COGNITO_USER_POOL_ID`
 
 ## Git Workflow
 
@@ -83,3 +86,4 @@ See `.env.local.example` for all required variables. Key ones:
 - **SLA config:** DynamoDB table `oblik-sla-config` (PK: `pipeline_id`). Per-pipeline thresholds: uptimeTargetPercent, maxExecutionDurationSeconds, freshnessWindowMinutes. Admin-only writes, follows `oblik-alert-preferences` pattern.
 - **Analytics:** Computed on-demand from SFN executions (not pre-aggregated). Paginates `listExecutions` until past period cutoff, batch-describes for recordCount. 5-min cache via `Cache-Control: s-maxage=300`. Read-only endpoints use standard multi-tenant filtering (no admin check).
 - **Schedule parsing:** `parseScheduleIntervalMinutes()` in `src/lib/aws/analytics.ts` handles `rate(N hours|minutes|days)` and simple cron patterns. Returns `null` for unparseable → freshness skipped.
+- **User management:** Cognito SDK operations in `src/lib/aws/cognito.ts`. Admin-only API routes at `/api/users`. No multi-tenant check (global admin resource). Self-protection: API prevents admins from deleting/disabling themselves or removing themselves from Admin group. N+1 group fetching acceptable for <50 users. Username must not be email format (Cognito pool uses email as alias).
