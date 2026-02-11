@@ -23,6 +23,7 @@ src/
       auth/[...nextauth]/       # NextAuth endpoints
       pipelines/                # Pipeline API routes
   components/                   # React components
+    analytics/                  # Analytics stat cards, SLA compliance, freshness chart
     layout/                     # Sidebar, Header, etc.
     metrics/                    # Chart components
   hooks/                        # Custom React hooks (SWR wrappers)
@@ -79,3 +80,6 @@ See `.env.local.example` for all required variables. Key ones:
 - **Manual trigger:** Embeds audit info (`triggeredBy`, `triggeredAt`, `source`) in SFN execution input. Execution name format: `manual-{timestamp}-{uuid8}`.
 - **Alerting:** DynamoDB tables `oblik-alert-preferences` (per-pipeline config) and `oblik-alert-history` (with 90-day TTL). Delivers via SNS email and Slack webhooks. Evaluation logic in `alerts-evaluate.ts` handles failure, consecutive failures, and recovery detection with 5-min rate limiting.
 - **API key auth pattern:** For endpoints called by AWS services (not users), use `x-api-key` header auth instead of Cognito. Add the path to `middleware.ts` matcher exclusion list (e.g., `api/alerts/evaluate`).
+- **SLA config:** DynamoDB table `oblik-sla-config` (PK: `pipeline_id`). Per-pipeline thresholds: uptimeTargetPercent, maxExecutionDurationSeconds, freshnessWindowMinutes. Admin-only writes, follows `oblik-alert-preferences` pattern.
+- **Analytics:** Computed on-demand from SFN executions (not pre-aggregated). Paginates `listExecutions` until past period cutoff, batch-describes for recordCount. 5-min cache via `Cache-Control: s-maxage=300`. Read-only endpoints use standard multi-tenant filtering (no admin check).
+- **Schedule parsing:** `parseScheduleIntervalMinutes()` in `src/lib/aws/analytics.ts` handles `rate(N hours|minutes|days)` and simple cron patterns. Returns `null` for unparseable → freshness skipped.

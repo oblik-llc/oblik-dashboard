@@ -9,6 +9,7 @@ export interface AlertTriggers {
   onFailure: boolean;
   onConsecutiveFailures: { enabled: boolean; threshold: number };
   onRecovery: boolean;
+  onSLABreach?: { enabled: boolean };
 }
 
 export interface AlertPreferences {
@@ -22,7 +23,7 @@ export interface AlertPreferences {
 
 // ── Alert History (DynamoDB: oblik-alert-history) ──
 
-export type AlertType = "failure" | "consecutive_failures" | "recovery";
+export type AlertType = "failure" | "consecutive_failures" | "recovery" | "sla_breach";
 export type AlertChannel = "email" | "slack";
 
 export interface AlertHistoryEntry {
