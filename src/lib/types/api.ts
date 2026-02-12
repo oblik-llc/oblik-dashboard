@@ -298,6 +298,55 @@ export interface UpdateUserStatusRequest {
   enabled: boolean;
 }
 
+// ── Transformation list endpoint ──
+
+export interface TransformationJobOverview {
+  jobId: string;
+  clientName: string;
+  jobName: string;
+  triggerType: string;
+  scheduleExpression: string | null;
+  dbtCommands: string[];
+  status: PipelineStatus;
+  isCurrentlyRunning: boolean;
+  lastRun: LastSyncSummary | null;
+  recentSuccessRate: number;
+}
+
+export interface TransformationJobsListResponse {
+  jobs: TransformationJobOverview[];
+}
+
+// ── Transformation detail endpoint ──
+
+export interface TransformationJobDetailResponse {
+  jobId: string;
+  clientName: string;
+  jobName: string;
+  triggerType: string;
+  scheduleExpression: string | null;
+  dbtCommands: string[];
+  dbtProjectPath: string;
+  cpu: number;
+  memory: number;
+  stateMachineArn: string;
+  ecsLogGroup: string;
+  sfnLogGroup: string;
+  registeredAt: string;
+  enabled: boolean;
+  status: PipelineStatus;
+  isCurrentlyRunning: boolean;
+  lastRun: LastSyncSummary | null;
+  recentSuccessRate: number;
+  recentExecutions: ExecutionSummaryResponse[];
+}
+
+// ── Transformation trigger endpoint ──
+
+export interface TriggerTransformationResponse {
+  message: string;
+}
+
 // ── Pipeline detail endpoint ──
 
 export interface PipelineDetailResponse {

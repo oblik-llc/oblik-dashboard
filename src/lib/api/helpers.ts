@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth/config";
 import type { Session } from "next-auth";
 import type { Pipeline, ExecutionSummary } from "@/lib/types/pipeline";
+import type { TransformationJob } from "@/lib/types/transformation";
 import { AwsServiceError } from "@/lib/types/pipeline";
 import type { PipelineStatus, LastSyncSummary } from "@/lib/types/api";
 
@@ -51,6 +52,14 @@ export function filterPipelinesByClient(
 ): Pipeline[] {
   if (!allowedClients) return pipelines;
   return pipelines.filter((p) => allowedClients.includes(p.client_name));
+}
+
+export function filterTransformationJobsByClient(
+  jobs: TransformationJob[],
+  allowedClients: string[] | null
+): TransformationJob[] {
+  if (!allowedClients) return jobs;
+  return jobs.filter((j) => allowedClients.includes(j.client_name));
 }
 
 // ── Status helpers ──
@@ -120,6 +129,25 @@ export function buildLastSync(
       execution.stopDate
     ),
   };
+}
+
+export function computeTransformationStatus(
+  isRunning: boolean,
+  latestExecution: ExecutionSummary | undefined
+): PipelineStatus {
+  if (isRunning) return "running";
+  if (!latestExecution) return "unknown";
+
+  switch (latestExecution.status) {
+    case "SUCCEEDED":
+      return "healthy";
+    case "FAILED":
+    case "TIMED_OUT":
+    case "ABORTED":
+      return "failing";
+    default:
+      return "unknown";
+  }
 }
 
 // ── Error helpers ──

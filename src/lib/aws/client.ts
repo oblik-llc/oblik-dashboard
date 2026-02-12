@@ -5,6 +5,7 @@ import { CloudWatchClient } from "@aws-sdk/client-cloudwatch";
 import { CloudWatchLogsClient } from "@aws-sdk/client-cloudwatch-logs";
 import { SNSClient } from "@aws-sdk/client-sns";
 import { CognitoIdentityProviderClient } from "@aws-sdk/client-cognito-identity-provider";
+import { EventBridgeClient } from "@aws-sdk/client-eventbridge";
 
 const awsConfig = {
   region: process.env.OBLIK_AWS_REGION || process.env.AWS_REGION,
@@ -23,6 +24,7 @@ let cloudWatchClient: CloudWatchClient | null = null;
 let cloudWatchLogsClient: CloudWatchLogsClient | null = null;
 let snsClient: SNSClient | null = null;
 let cognitoClient: CognitoIdentityProviderClient | null = null;
+let eventBridgeClient: EventBridgeClient | null = null;
 
 export function getDynamoDBClient(): DynamoDBDocumentClient {
   if (!dynamoDBClient) {
@@ -67,4 +69,11 @@ export function getCognitoClient(): CognitoIdentityProviderClient {
     cognitoClient = new CognitoIdentityProviderClient(awsConfig);
   }
   return cognitoClient;
+}
+
+export function getEventBridgeClient(): EventBridgeClient {
+  if (!eventBridgeClient) {
+    eventBridgeClient = new EventBridgeClient(awsConfig);
+  }
+  return eventBridgeClient;
 }
