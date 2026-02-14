@@ -13,6 +13,7 @@ import {
   buildLastSync,
   handleAwsError,
 } from "@/lib/api/helpers";
+import { parseScheduleIntervalMinutes } from "@/lib/aws/analytics";
 import type { PipelineOverview, PipelinesListResponse } from "@/lib/types/api";
 
 export async function GET() {
@@ -44,6 +45,25 @@ export async function GET() {
         const executions = execResult?.executions ?? [];
         const latest = executions[0];
 
+        const lastSync = buildLastSync(
+          executions.find((e) => e.status !== "RUNNING")
+        );
+
+        let nextRunAt: string | null = null;
+        if (pipeline.enabled && !running && lastSync?.timestamp) {
+          const intervalMin = parseScheduleIntervalMinutes(
+            pipeline.schedule_expression
+          );
+          if (intervalMin !== null) {
+            const next = new Date(
+              new Date(lastSync.timestamp).getTime() + intervalMin * 60_000
+            );
+            if (next.getTime() > Date.now()) {
+              nextRunAt = next.toISOString();
+            }
+          }
+        }
+
         return {
           pipelineId: pipeline.pipeline_id,
           clientName: pipeline.client_name,
@@ -52,11 +72,10 @@ export async function GET() {
           enabled: pipeline.enabled,
           status: computeStatus(running, latest),
           isCurrentlyRunning: running,
-          lastSync: buildLastSync(
-            executions.find((e) => e.status !== "RUNNING")
-          ),
+          lastSync,
           recentSuccessRate: computeSuccessRate(executions),
           scheduleExpression: pipeline.schedule_expression,
+          nextRunAt,
         };
       })
     );

@@ -27,6 +27,7 @@ export interface PipelineOverview {
   lastSync: LastSyncSummary | null;
   recentSuccessRate: number;
   scheduleExpression: string;
+  nextRunAt: string | null;
 }
 
 export interface PipelinesListResponse {
