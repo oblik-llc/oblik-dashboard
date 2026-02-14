@@ -7,8 +7,6 @@ import {
   FileSpreadsheet,
   Globe,
   HardDrive,
-  Power,
-  PowerOff,
 } from "lucide-react";
 import {
   Card,
@@ -49,9 +47,9 @@ export function PipelineCard({ pipeline }: PipelineCardProps) {
           <div>
             <CardTitle className="flex items-center gap-2">
               <ConnectorIcon connectorType={pipeline.connectorType} className="size-4 text-muted-foreground" />
-              {pipeline.clientName}
+              {pipeline.connectorType}
             </CardTitle>
-            <CardDescription>{pipeline.connectorType}</CardDescription>
+            <CardDescription>{pipeline.environment}</CardDescription>
           </div>
           <CardAction>
             <StatusBadge status={pipeline.status} />
@@ -96,19 +94,13 @@ export function PipelineCard({ pipeline }: PipelineCardProps) {
               </dd>
             </div>
             <div>
-              <dt className="text-muted-foreground">Status</dt>
-              <dd className="flex items-center gap-1.5 font-medium">
-                {pipeline.enabled ? (
-                  <>
-                    <Power className="size-3.5 text-emerald-600" />
-                    Enabled
-                  </>
-                ) : (
-                  <>
-                    <PowerOff className="size-3.5 text-zinc-400" />
-                    Disabled
-                  </>
-                )}
+              <dt className="text-muted-foreground">Next Run</dt>
+              <dd className="font-medium">
+                {pipeline.nextRunAt
+                  ? formatDistanceToNow(new Date(pipeline.nextRunAt), {
+                      addSuffix: true,
+                    })
+                  : "—"}
               </dd>
             </div>
           </dl>

@@ -96,10 +96,28 @@ export default function Home() {
           </p>
         </div>
       ) : pipelines ? (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {pipelines.map((pipeline) => (
-            <PipelineCard key={pipeline.pipelineId} pipeline={pipeline} />
-          ))}
+        <div className="space-y-8">
+          {Object.entries(
+            pipelines.reduce<Record<string, typeof pipelines>>((groups, p) => {
+              (groups[p.clientName] ??= []).push(p);
+              return groups;
+            }, {})
+          )
+            .sort(([a], [b]) => a.localeCompare(b))
+            .map(([clientName, group]) => (
+              <section key={clientName}>
+                <h2 className="mb-3 text-lg font-semibold tracking-tight text-foreground">
+                  {clientName}
+                </h2>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {group
+                    .sort((a, b) => a.connectorType.localeCompare(b.connectorType))
+                    .map((pipeline) => (
+                      <PipelineCard key={pipeline.pipelineId} pipeline={pipeline} />
+                    ))}
+                </div>
+              </section>
+            ))}
         </div>
       ) : null}
     </div>
