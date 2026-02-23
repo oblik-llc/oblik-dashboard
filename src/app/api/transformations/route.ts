@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { listTransformationJobs } from "@/lib/aws/transformation-db";
 import {
-  isCurrentlyRunning,
   listExecutions,
+  groupExecutionsByJob,
 } from "@/lib/aws/stepfunctions";
 import {
   requireAuth,
@@ -32,41 +32,59 @@ export async function GET() {
     const allowedClients = getClientFilter(session.user.groups);
     const jobs = filterTransformationJobsByClient(allJobs, allowedClients);
 
-    // 4. Group jobs by SFN ARN to deduplicate queries
-    const sfnArnMap = new Map<
-      string,
-      { running: boolean; executions: Awaited<ReturnType<typeof listExecutions>>["executions"] }
-    >();
-
+    // 4. Fetch executions per unique SFN ARN, then group by job name
     const uniqueArns = [...new Set(jobs.map((j) => j.state_machine_arn))];
+
+    // Fetch executions for each ARN (including RUNNING for status detection)
+    const arnExecutions = new Map<
+      string,
+      { all: Awaited<ReturnType<typeof listExecutions>>["executions"]; running: Awaited<ReturnType<typeof listExecutions>>["executions"] }
+    >();
 
     await Promise.all(
       uniqueArns.map(async (arn) => {
         const results = await Promise.allSettled([
-          isCurrentlyRunning(arn),
-          listExecutions(arn, { maxResults: 10 }),
+          listExecutions(arn, { maxResults: 20 }),
+          listExecutions(arn, { statusFilter: "RUNNING", maxResults: 10 }),
         ]);
 
-        const running =
-          results[0].status === "fulfilled" ? results[0].value : false;
-        const execResult =
-          results[1].status === "fulfilled" ? results[1].value : null;
+        const arnAllExecs =
+          results[0].status === "fulfilled"
+            ? results[0].value.executions
+            : [];
+        const arnRunningExecs =
+          results[1].status === "fulfilled"
+            ? results[1].value.executions
+            : [];
 
-        sfnArnMap.set(arn, {
-          running,
-          executions: execResult?.executions ?? [],
-        });
+        arnExecutions.set(arn, { all: arnAllExecs, running: arnRunningExecs });
       })
     );
 
-    // 5. Build overview for each job
-    const enriched: TransformationJobOverview[] = jobs.map((job) => {
-      const sfnData = sfnArnMap.get(job.state_machine_arn) ?? {
-        running: false,
-        executions: [],
-      };
+    // Collect all executions and group by job name via input inspection
+    const allExecs = [...arnExecutions.values()].flatMap((v) => v.all);
+    const allRunning = new Set(
+      [...arnExecutions.values()]
+        .flatMap((v) => v.running)
+        .map((e) => e.executionArn)
+    );
 
-      const latest = sfnData.executions[0];
+    const execsByJob = await groupExecutionsByJob(allExecs);
+
+    // Derive running status per job from the grouped results
+    const runningByJob = new Map<string, boolean>();
+    for (const [jobName, execs] of execsByJob) {
+      runningByJob.set(
+        jobName,
+        execs.some((e) => allRunning.has(e.executionArn))
+      );
+    }
+
+    // 5. Build overview for each job using its own executions
+    const enriched: TransformationJobOverview[] = jobs.map((job) => {
+      const jobExecs = execsByJob.get(job.job_name) ?? [];
+      const isRunning = runningByJob.get(job.job_name) ?? false;
+      const latest = jobExecs[0];
 
       return {
         jobId: job.job_id,
@@ -75,12 +93,12 @@ export async function GET() {
         triggerType: job.trigger_type,
         scheduleExpression: job.schedule_expression,
         dbtCommands: job.dbt_commands,
-        status: computeTransformationStatus(sfnData.running, latest),
-        isCurrentlyRunning: sfnData.running,
+        status: computeTransformationStatus(isRunning, latest),
+        isCurrentlyRunning: isRunning,
         lastRun: buildLastSync(
-          sfnData.executions.find((e) => e.status !== "RUNNING")
+          jobExecs.find((e) => e.status !== "RUNNING")
         ),
-        recentSuccessRate: computeSuccessRate(sfnData.executions),
+        recentSuccessRate: computeSuccessRate(jobExecs),
       };
     });
 

@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { getTransformationJob } from "@/lib/aws/transformation-db";
 import {
-  isCurrentlyRunning,
-  listExecutions,
+  isJobCurrentlyRunning,
+  listExecutionsForJob,
 } from "@/lib/aws/stepfunctions";
 import {
   requireAuth,
@@ -52,8 +52,10 @@ export async function GET(
 
     // 5. Parallel enrichment
     const [runningResult, execResult] = await Promise.allSettled([
-      isCurrentlyRunning(job.state_machine_arn),
-      listExecutions(job.state_machine_arn, { maxResults: 10 }),
+      isJobCurrentlyRunning(job.state_machine_arn, job.job_name),
+      listExecutionsForJob(job.state_machine_arn, job.job_name, {
+        maxResults: 10,
+      }),
     ]);
 
     const running =
