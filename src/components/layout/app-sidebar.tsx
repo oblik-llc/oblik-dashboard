@@ -3,7 +3,7 @@
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import { GitBranch, BarChart3, Users } from "lucide-react";
+import { GitBranch, Layers, BarChart3, Users } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -23,6 +23,11 @@ const navItems = [
     title: "Pipelines",
     url: "/",
     icon: GitBranch,
+  },
+  {
+    title: "Transformations",
+    url: "/transformations",
+    icon: Layers,
   },
   {
     title: "Analytics",
