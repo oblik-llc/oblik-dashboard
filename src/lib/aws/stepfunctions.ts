@@ -201,3 +201,136 @@ export async function getLatestExecution(
   const result = await listExecutions(stateMachineArn, { maxResults: 1 });
   return result.executions[0] ?? null;
 }
+
+// ── Job-filtered execution helpers (transformation pipelines) ──
+
+/**
+ * Extracts the job name from a Step Functions execution input payload.
+ * Returns null if input is missing or doesn't contain a recognizable job.
+ */
+function extractJobName(input?: string): string | null {
+  if (!input) return null;
+  try {
+    const parsed = JSON.parse(input);
+    const jobs = parsed.jobs;
+    if (Array.isArray(jobs) && jobs.length > 0) {
+      return jobs[0].job_name ?? null;
+    }
+  } catch {
+    // Malformed input — skip
+  }
+  return null;
+}
+
+/**
+ * Lists executions for a specific job by filtering on the execution input payload.
+ * Fetches candidate executions, describes each to get the input, and returns
+ * only those whose `jobs[].job_name` matches the target.
+ */
+export async function listExecutionsForJob(
+  stateMachineArn: string,
+  jobName: string,
+  opts?: ListExecutionsOptions
+): Promise<ListExecutionsResult> {
+  const desiredCount = opts?.maxResults ?? 20;
+  // Fetch more candidates than needed since some won't match
+  const candidateCount = Math.min(desiredCount * 3, 100);
+
+  const candidates = await listExecutions(stateMachineArn, {
+    statusFilter: opts?.statusFilter,
+    maxResults: candidateCount,
+    nextToken: opts?.nextToken,
+  });
+
+  // Describe each execution in parallel to get the input payload
+  const described = await describeExecutionsBatch(
+    candidates.executions.map((e) => e.executionArn)
+  );
+
+  // Build a lookup of executionArn -> input
+  const inputByArn = new Map<string, string | undefined>();
+  for (const detail of described) {
+    inputByArn.set(detail.executionArn, detail.input);
+  }
+
+  // Filter to matching executions, preserving the original summary objects
+  const matching = candidates.executions.filter((exec) => {
+    const input = inputByArn.get(exec.executionArn);
+    return extractJobName(input) === jobName;
+  });
+
+  return {
+    executions: matching.slice(0, desiredCount),
+    nextToken: candidates.nextToken,
+  };
+}
+
+/**
+ * Checks if a specific job is currently running by inspecting RUNNING
+ * executions' input payloads.
+ */
+export async function isJobCurrentlyRunning(
+  stateMachineArn: string,
+  jobName: string
+): Promise<boolean> {
+  const result = await listExecutionsForJob(stateMachineArn, jobName, {
+    statusFilter: "RUNNING",
+    maxResults: 1,
+  });
+  return result.executions.length > 0;
+}
+
+/**
+ * Describes multiple executions in parallel and returns their details.
+ * Used internally to get the `input` field for filtering.
+ */
+async function describeExecutionsBatch(
+  executionArns: string[]
+): Promise<ExecutionDetail[]> {
+  if (executionArns.length === 0) return [];
+
+  const results = await Promise.allSettled(
+    executionArns.map((arn) => describeExecution(arn))
+  );
+
+  return results
+    .filter(
+      (r): r is PromiseFulfilledResult<ExecutionDetail> =>
+        r.status === "fulfilled"
+    )
+    .map((r) => r.value);
+}
+
+/**
+ * Describes a batch of executions and groups them by job name.
+ * Returns a map of jobName -> ExecutionSummary[].
+ * Executions with unrecognizable input are omitted.
+ */
+export async function groupExecutionsByJob(
+  executions: ExecutionSummary[]
+): Promise<Map<string, ExecutionSummary[]>> {
+  const described = await describeExecutionsBatch(
+    executions.map((e) => e.executionArn)
+  );
+
+  const inputByArn = new Map<string, string | undefined>();
+  for (const detail of described) {
+    inputByArn.set(detail.executionArn, detail.input);
+  }
+
+  const grouped = new Map<string, ExecutionSummary[]>();
+  for (const exec of executions) {
+    const input = inputByArn.get(exec.executionArn);
+    const name = extractJobName(input);
+    if (!name) continue;
+
+    const list = grouped.get(name);
+    if (list) {
+      list.push(exec);
+    } else {
+      grouped.set(name, [exec]);
+    }
+  }
+
+  return grouped;
+}

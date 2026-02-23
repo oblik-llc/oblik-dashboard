@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getTransformationJob } from "@/lib/aws/transformation-db";
-import { listExecutions } from "@/lib/aws/stepfunctions";
+import { listExecutionsForJob } from "@/lib/aws/stepfunctions";
 import {
   requireAuth,
   getClientFilter,
@@ -60,12 +60,16 @@ export async function GET(
     const statusFilter =
       statusParam && VALID_STATUSES.has(statusParam) ? statusParam : undefined;
 
-    // 6. Fetch executions
-    const result = await listExecutions(job.state_machine_arn, {
-      statusFilter,
-      maxResults: 20,
-      nextToken: nextTokenParam,
-    });
+    // 6. Fetch executions filtered by job name
+    const result = await listExecutionsForJob(
+      job.state_machine_arn,
+      job.job_name,
+      {
+        statusFilter,
+        maxResults: 20,
+        nextToken: nextTokenParam,
+      }
+    );
 
     // 7. Build response
     const body: ExecutionsListResponse = {
