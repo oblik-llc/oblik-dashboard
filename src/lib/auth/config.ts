@@ -7,6 +7,7 @@ declare module "next-auth" {
   interface Session {
     user: {
       id: string;
+      username: string;
       groups: string[];
     } & DefaultSession["user"];
   }
@@ -14,6 +15,7 @@ declare module "next-auth" {
 
 declare module "@auth/core/jwt" {
   interface JWT {
+    username: string;
     groups: string[];
     refresh_token?: string;
     expires_at?: number;
@@ -34,6 +36,8 @@ const config: NextAuthConfig = {
   callbacks: {
     jwt({ token, account, profile }) {
       if (account && profile) {
+        token.username =
+          (profile["cognito:username"] as string | undefined) ?? token.sub!;
         token.groups =
           (profile["cognito:groups"] as string[] | undefined) ?? [];
         token.refresh_token = account.refresh_token ?? undefined;
@@ -43,6 +47,7 @@ const config: NextAuthConfig = {
     },
     session({ session, token }) {
       session.user.id = token.sub!;
+      session.user.username = token.username;
       session.user.groups = token.groups;
       return session;
     },

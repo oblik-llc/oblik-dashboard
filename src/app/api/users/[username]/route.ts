@@ -21,7 +21,7 @@ export async function DELETE(
     const { username } = await params;
 
     // Prevent self-deletion
-    if (username === session.user.id) {
+    if (username === session.user.username) {
       return NextResponse.json(
         { error: "Bad Request", message: "You cannot delete your own account" },
         { status: 400 }

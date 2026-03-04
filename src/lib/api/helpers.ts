@@ -38,12 +38,11 @@ export async function requireAuth(): Promise<AuthResult | AuthError> {
 }
 
 export function getClientFilter(groups: string[]): string[] | null {
-  const clientNames = groups
+  if (isAdmin(groups)) return null;
+
+  return groups
     .filter((g) => g.startsWith("client:"))
     .map((g) => g.slice("client:".length));
-
-  // No client groups means admin — no filtering
-  return clientNames.length > 0 ? clientNames : null;
 }
 
 export function filterPipelinesByClient(

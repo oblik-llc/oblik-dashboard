@@ -32,7 +32,7 @@ export async function PUT(
 
     // Prevent removing self from Admin
     if (
-      username === session.user.id &&
+      username === session.user.username &&
       body.removeGroups?.includes("admin")
     ) {
       return NextResponse.json(
