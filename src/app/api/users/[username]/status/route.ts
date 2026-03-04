@@ -23,7 +23,7 @@ export async function PUT(
     const body = (await request.json()) as UpdateUserStatusRequest;
 
     // Prevent self-disable
-    if (username === session.user.id && !body.enabled) {
+    if (username === session.user.username && !body.enabled) {
       return NextResponse.json(
         {
           error: "Bad Request",

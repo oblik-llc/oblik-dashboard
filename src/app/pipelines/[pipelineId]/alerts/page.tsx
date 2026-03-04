@@ -32,7 +32,7 @@ export default function AlertsPage() {
   const params = useParams<{ pipelineId: string }>();
   const pipelineId = decodeURIComponent(params.pipelineId);
   const { data: session } = useSession();
-  const isAdmin = session?.user?.groups?.includes("Admin") ?? false;
+  const isAdmin = session?.user?.groups?.includes("admin") ?? false;
 
   const { preferences, isLoading, mutate } = useAlertPreferences(pipelineId);
   const { history, isLoading: historyLoading, mutate: mutateHistory } = useAlertHistory(pipelineId);

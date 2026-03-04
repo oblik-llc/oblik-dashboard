@@ -31,7 +31,7 @@ export default function PipelineDetailPage() {
   const pipelineId = decodeURIComponent(params.pipelineId);
   const { pipeline, isLoading, error, mutate } = usePipeline(pipelineId);
   const { data: session } = useSession();
-  const isAdmin = session?.user?.groups?.includes("Admin") ?? false;
+  const isAdmin = session?.user?.groups?.includes("admin") ?? false;
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6">

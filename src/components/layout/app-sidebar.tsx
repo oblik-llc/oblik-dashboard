@@ -47,7 +47,7 @@ const adminNavItems = [
 export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
   const { data: session } = useSession();
-  const isAdmin = session?.user?.groups?.includes("Admin") ?? false;
+  const isAdmin = session?.user?.groups?.includes("admin") ?? false;
 
   return (
     <Sidebar collapsible="icon" {...props}>
