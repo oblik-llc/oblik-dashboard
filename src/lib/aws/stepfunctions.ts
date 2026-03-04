@@ -90,10 +90,36 @@ export async function getExecutionDetail(
       flattenHistoryEvent(ev)
     );
 
-    return { detail, history };
+    const ecsTaskLogStream = extractEcsTaskLogStream(
+      historyResult.events ?? []
+    );
+
+    return { detail, history, ecsTaskLogStream };
   } catch (error) {
     throw new AwsServiceError("StepFunctions", "DescribeExecution", error);
   }
+}
+
+function extractEcsTaskLogStream(
+  events: HistoryEvent[]
+): string | null {
+  for (const ev of events) {
+    const det = ev.taskSucceededEventDetails;
+    if (det?.resourceType !== "ecs" || !det.output) continue;
+    try {
+      const out = JSON.parse(det.output) as {
+        Containers?: Array<{ Name?: string; TaskArn?: string }>;
+      };
+      const container = out.Containers?.[0];
+      if (!container?.Name || !container?.TaskArn) continue;
+      const taskId = container.TaskArn.split("/").pop();
+      if (!taskId) continue;
+      return `ecs/${container.Name}/${taskId}`;
+    } catch {
+      // malformed output — skip
+    }
+  }
+  return null;
 }
 
 function flattenHistoryEvent(ev: HistoryEvent): ExecutionHistoryEvent {
