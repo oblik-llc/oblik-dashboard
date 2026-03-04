@@ -77,7 +77,7 @@ export default function LogViewerPage() {
 
   // Derive execution name from ARN (last colon-delimited segment) for display
   const executionName = qExecutionArn
-    ? qExecutionArn.split(":").pop()
+    ? (qExecutionArn.split(":").pop() || undefined)
     : undefined;
 
   const [defaultStart] = useState(

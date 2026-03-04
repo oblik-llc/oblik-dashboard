@@ -27,7 +27,7 @@ Both sources are fully isolated. If ECS task never launched (early failure), deg
 
 Parse the SFN execution history to extract:
 - The `TaskSucceeded` event where `resourceType === "ecs"`
-- From its `output` JSON: `Tasks[0].TaskArn` → task ID (last path segment), `Containers[0].Name` → container name
+- From its `output` JSON: `Containers[0].TaskArn` → task ID (last path segment), `Containers[0].Name` → container name
 - Derive `ecsTaskLogStream = "ecs/{containerName}/{taskId}"`
 
 Add to `ExecutionDetailResponse`:

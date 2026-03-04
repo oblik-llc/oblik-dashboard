@@ -609,7 +609,7 @@ function SidebarMenuSkeleton({
   // Stable unique width per skeleton instance derived from useId (avoids Math.random during render).
   const id = React.useId()
   const width = React.useMemo(() => {
-    // Hash the id string to a number in [50, 90] so each skeleton instance has a distinct width.
+    // Hash the id string to a value in [50, 90] for visually varied skeleton widths.
     const hash = id.split("").reduce((acc, ch) => acc + ch.charCodeAt(0), 0)
     return `${(hash % 40) + 50}%`
   }, [id])

@@ -53,6 +53,20 @@ export async function GET(
     const executionArn = url.searchParams.get("executionArn") || undefined;
     const ecsTaskLogStream = url.searchParams.get("ecsTaskLogStream") || undefined;
     const nextToken = url.searchParams.get("nextToken") || undefined;
+
+    // Validate execution-scoping params to prevent injection / confusing CloudWatch errors
+    if (executionArn && !/^arn:aws:states:[a-z0-9-]+:\d{12}:execution:[a-zA-Z0-9_-]+:[a-zA-Z0-9_:.-]+$/.test(executionArn)) {
+      return NextResponse.json(
+        { error: "Bad Request", message: "executionArn must be a valid Step Functions execution ARN" },
+        { status: 400 }
+      );
+    }
+    if (ecsTaskLogStream && !/^ecs\/[^/]+\/[a-f0-9]+$/.test(ecsTaskLogStream)) {
+      return NextResponse.json(
+        { error: "Bad Request", message: "ecsTaskLogStream must have format ecs/{containerName}/{taskId}" },
+        { status: 400 }
+      );
+    }
     const limitParam = url.searchParams.get("limit");
 
     // 6. Validate required params
@@ -114,8 +128,10 @@ export async function GET(
     if (logGroup === "sfn" && executionArn) {
       // SFN logs: every entry has execution_arn as a JSON field
       resolvedFilterPattern = `{ $.execution_arn = "${executionArn}" }`;
-      // user text filter not applied when execution-scoped (CloudWatch
-      // JSON filter patterns can't be combined with plain text patterns)
+      // User text filter is not applied for execution-scoped SFN queries.
+      // Combining would require a compound JSON expression
+      // (e.g. { $.execution_arn = "..." && $.message = "*term*" }),
+      // which adds complexity. The execution_arn filter alone isolates the execution.
     } else if (logGroup === "ecs" && ecsTaskLogStream) {
       // ECS logs: scope to the specific task's log stream; user filter still applies
       logStreamNames = [ecsTaskLogStream];

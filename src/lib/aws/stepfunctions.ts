@@ -115,8 +115,12 @@ function extractEcsTaskLogStream(
       const taskId = container.TaskArn.split("/").pop();
       if (!taskId) continue;
       return `ecs/${container.Name}/${taskId}`;
-    } catch {
-      // malformed output — skip
+    } catch (err) {
+      console.error(
+        "[extractEcsTaskLogStream] Failed to parse ECS task output",
+        { outputPreview: det.output?.slice(0, 200) },
+        err
+      );
     }
   }
   return null;

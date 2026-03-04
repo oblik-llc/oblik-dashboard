@@ -169,7 +169,7 @@ export default function ExecutionDetailPage() {
   );
 
   const logsHref = useMemo(() => {
-    if (!execution) return "#";
+    if (!execution) return null;
     const p = new URLSearchParams({
       startTime: execution.startDate,
       endTime: execution.stopDate || new Date().toISOString(),
@@ -268,13 +268,15 @@ export default function ExecutionDetailPage() {
           </Card>
 
           {/* View logs link */}
-          <Link
-            href={logsHref}
-            className="inline-flex items-center gap-2 text-sm text-blue-600 hover:underline"
-          >
-            <FileText className="size-4" />
-            View Logs for this Execution
-          </Link>
+          {logsHref && (
+            <Link
+              href={logsHref}
+              className="inline-flex items-center gap-2 text-sm text-blue-600 hover:underline"
+            >
+              <FileText className="size-4" />
+              View Logs for this Execution
+            </Link>
+          )}
 
           {/* Error panel */}
           {(execution.status === "FAILED" ||
