@@ -14,7 +14,7 @@ const USERNAME_REGEX = /^[a-zA-Z0-9_-]{2,50}$/;
 function toUserResponse(user: CognitoUser): UserResponse {
   return {
     ...user,
-    isAdmin: user.groups.includes("Admin"),
+    isAdmin: user.groups.includes("admin"),
     clientGroups: user.groups
       .filter((g) => g.startsWith("client:"))
       .map((g) => g.slice("client:".length)),

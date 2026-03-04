@@ -33,12 +33,12 @@ export async function PUT(
     // Prevent removing self from Admin
     if (
       username === session.user.id &&
-      body.removeGroups?.includes("Admin")
+      body.removeGroups?.includes("admin")
     ) {
       return NextResponse.json(
         {
           error: "Bad Request",
-          message: "You cannot remove yourself from the Admin group",
+          message: "You cannot remove yourself from the admin group",
         },
         { status: 400 }
       );

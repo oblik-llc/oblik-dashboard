@@ -90,10 +90,10 @@ export function EditGroupsDialog({
     }
   };
 
-  const adminGroup = allGroups.find((g) => g.name === "Admin");
+  const adminGroup = allGroups.find((g) => g.name === "admin");
   const clientGroups = allGroups.filter((g) => g.name.startsWith("client:"));
   const otherGroups = allGroups.filter(
-    (g) => g.name !== "Admin" && !g.name.startsWith("client:")
+    (g) => g.name !== "admin" && !g.name.startsWith("client:")
   );
 
   return (
@@ -116,10 +116,10 @@ export function EditGroupsDialog({
                 </p>
               </div>
               <Switch
-                checked={groupState["Admin"] ?? false}
+                checked={groupState["admin"] ?? false}
                 disabled={isSelf}
                 onCheckedChange={(checked) =>
-                  setGroupState((prev) => ({ ...prev, Admin: checked }))
+                  setGroupState((prev) => ({ ...prev, admin: checked }))
                 }
               />
             </div>
@@ -182,7 +182,7 @@ export function EditGroupsDialog({
 
           {isSelf && (
             <p className="text-xs text-muted-foreground">
-              You cannot remove yourself from the Admin group.
+              You cannot remove yourself from the admin group.
             </p>
           )}
 

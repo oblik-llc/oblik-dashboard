@@ -41,7 +41,7 @@ export default function PipelineAnalyticsPage() {
   const params = useParams<{ pipelineId: string }>();
   const pipelineId = decodeURIComponent(params.pipelineId);
   const { data: session } = useSession();
-  const isAdmin = session?.user?.groups?.includes("Admin") ?? false;
+  const isAdmin = session?.user?.groups?.includes("admin") ?? false;
 
   const [period, setPeriod] = useState<AnalyticsPeriod>("30d");
 

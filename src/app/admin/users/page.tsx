@@ -10,7 +10,7 @@ import { InviteUserDialog } from "@/components/admin/invite-user-dialog";
 
 export default function UserManagementPage() {
   const { data: session } = useSession();
-  const isAdmin = session?.user?.groups?.includes("Admin") ?? false;
+  const isAdmin = session?.user?.groups?.includes("admin") ?? false;
   const currentUserId = session?.user?.id ?? "";
 
   const { users, groups, isLoading, error, mutate } = useUsers();

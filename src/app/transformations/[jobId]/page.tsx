@@ -29,7 +29,7 @@ export default function TransformationDetailPage() {
   const jobId = decodeURIComponent(params.jobId);
   const { job, isLoading, error, mutate } = useTransformation(jobId);
   const { data: session } = useSession();
-  const isAdmin = session?.user?.groups?.includes("Admin") ?? false;
+  const isAdmin = session?.user?.groups?.includes("admin") ?? false;
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6">
