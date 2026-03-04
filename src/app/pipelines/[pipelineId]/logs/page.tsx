@@ -224,7 +224,11 @@ export default function LogViewerPage() {
             {timeRangeLabel}
           </Badge>
           {activeFilter && (
-            <Badge variant="outline" className="font-mono text-xs">
+            <Badge
+              variant="outline"
+              className={`font-mono text-xs ${logSource === "sfn" && qExecutionArn ? "opacity-50 line-through" : ""}`}
+              title={logSource === "sfn" && qExecutionArn ? "Text filter not applied for execution-scoped SFN logs" : undefined}
+            >
               filter: {activeFilter}
             </Badge>
           )}
