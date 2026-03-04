@@ -58,12 +58,13 @@ export async function GET(
       executionId;
 
     // 6. Fetch execution detail + history
-    const { detail, history } = await getExecutionDetail(executionArn);
+    const { detail, history, ecsTaskLogStream } = await getExecutionDetail(executionArn);
 
     // 7. Build response
     const body: ExecutionDetailResponse = {
       ...serializeDetail(detail),
       history: history.map(serializeHistoryEvent),
+      ecsTaskLogStream,
     };
 
     return NextResponse.json(body, {
@@ -78,7 +79,7 @@ export async function GET(
 
 function serializeDetail(
   detail: ExecutionDetail
-): Omit<ExecutionDetailResponse, "history"> {
+): Omit<ExecutionDetailResponse, "history" | "ecsTaskLogStream"> {
   return {
     executionArn: detail.executionArn,
     name: detail.name,
