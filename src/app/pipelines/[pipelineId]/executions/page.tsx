@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { AlertCircle, RefreshCw, Loader2 } from "lucide-react";
@@ -67,10 +67,13 @@ export default function ExecutionHistoryPage() {
   );
 
   // Merge newly fetched data into accumulated list
-  const executions =
-    currentToken && accumulated.length > 0
-      ? [...accumulated, ...(data?.executions ?? [])]
-      : (data?.executions ?? []);
+  const executions = useMemo(
+    () =>
+      currentToken && accumulated.length > 0
+        ? [...accumulated, ...(data?.executions ?? [])]
+        : (data?.executions ?? []),
+    [currentToken, accumulated, data?.executions]
+  );
 
   const handleFilterChange = useCallback(
     (value: string) => {
@@ -86,7 +89,7 @@ export default function ExecutionHistoryPage() {
       setAccumulated(executions);
       setCurrentToken(data.nextToken);
     }
-  }, [data?.nextToken, executions]);
+  }, [data, executions]);
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6">

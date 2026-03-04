@@ -11,7 +11,6 @@ import {
   getClientFilter,
   computeStatus,
   computeSuccessRate,
-  computeDurationSeconds,
   buildLastSync,
   handleAwsError,
 } from "@/lib/api/helpers";
