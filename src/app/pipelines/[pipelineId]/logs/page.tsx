@@ -5,6 +5,7 @@ import { useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
   AlertCircle,
+  FileText,
   RefreshCw,
   Search,
   Loader2,
@@ -71,6 +72,13 @@ export default function LogViewerPage() {
   // Time range from query params or default to last 24 hours
   const qStart = searchParams.get("startTime");
   const qEnd = searchParams.get("endTime");
+  const qExecutionArn = searchParams.get("executionArn") || undefined;
+  const qEcsTaskLogStream = searchParams.get("ecsTaskLogStream") || undefined;
+
+  // Derive execution name from ARN (last colon-delimited segment) for display
+  const executionName = qExecutionArn
+    ? (qExecutionArn.split(":").pop() || undefined)
+    : undefined;
 
   const [defaultStart] = useState(
     () => new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
@@ -99,6 +107,8 @@ export default function LogViewerPage() {
     endTime,
     filter: activeFilter,
     nextToken: currentToken,
+    executionArn: qExecutionArn,
+    ecsTaskLogStream: qEcsTaskLogStream,
   });
 
   // Merge pages
@@ -208,14 +218,34 @@ export default function LogViewerPage() {
       </div>
 
       {/* Time range */}
-      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <Badge variant="secondary" className="font-mono text-xs">
-          {timeRangeLabel}
-        </Badge>
-        {activeFilter && (
-          <Badge variant="outline" className="font-mono text-xs">
-            filter: {activeFilter}
+      <div className="flex flex-col gap-2 text-sm text-muted-foreground">
+        <div className="flex items-center gap-2">
+          <Badge variant="secondary" className="font-mono text-xs">
+            {timeRangeLabel}
           </Badge>
+          {activeFilter && (
+            <Badge
+              variant="outline"
+              className={`font-mono text-xs ${logSource === "sfn" && qExecutionArn ? "opacity-50 line-through" : ""}`}
+              title={logSource === "sfn" && qExecutionArn ? "Text filter not applied for execution-scoped SFN logs" : undefined}
+            >
+              filter: {activeFilter}
+            </Badge>
+          )}
+        </div>
+        {executionName && (
+          <div className="flex items-center gap-2 rounded-md border border-blue-200 bg-blue-50 px-3 py-2 text-sm dark:border-blue-800 dark:bg-blue-950">
+            <FileText className="size-4 shrink-0 text-blue-600 dark:text-blue-400" />
+            <span className="text-blue-800 dark:text-blue-200">
+              Filtered to execution{" "}
+              <span className="font-mono font-medium">{executionName}</span>
+            </span>
+            {logSource === "ecs" && !qEcsTaskLogStream && (
+              <span className="ml-1 text-blue-600 dark:text-blue-400">
+                · ECS logs may include other concurrent runs (task did not complete)
+              </span>
+            )}
+          </div>
         )}
       </div>
 

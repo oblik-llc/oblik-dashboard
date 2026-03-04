@@ -9,7 +9,8 @@ export async function getLogs(
   endTime: number,
   filterPattern?: string,
   nextToken?: string,
-  limit: number = 100
+  limit: number = 100,
+  logStreamNames?: string[]
 ): Promise<LogQueryResult> {
   const client = getCloudWatchLogsClient();
 
@@ -22,6 +23,7 @@ export async function getLogs(
         filterPattern,
         nextToken,
         limit,
+        ...(logStreamNames && { logStreamNames }),
       })
     );
 

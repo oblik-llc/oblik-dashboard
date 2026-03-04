@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import {
@@ -168,6 +168,19 @@ export default function ExecutionDetailPage() {
     executionId
   );
 
+  const logsHref = useMemo(() => {
+    if (!execution) return null;
+    const p = new URLSearchParams({
+      startTime: execution.startDate,
+      endTime: execution.stopDate || new Date().toISOString(),
+      executionArn: execution.executionArn,
+    });
+    if (execution.ecsTaskLogStream) {
+      p.set("ecsTaskLogStream", execution.ecsTaskLogStream);
+    }
+    return `/pipelines/${encodeURIComponent(pipelineId)}/logs?${p.toString()}`;
+  }, [execution, pipelineId]);
+
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6">
       {/* Back link */}
@@ -255,13 +268,15 @@ export default function ExecutionDetailPage() {
           </Card>
 
           {/* View logs link */}
-          <Link
-            href={`/pipelines/${encodeURIComponent(pipelineId)}/logs?startTime=${encodeURIComponent(execution.startDate)}&endTime=${encodeURIComponent(execution.stopDate || new Date().toISOString())}`}
-            className="inline-flex items-center gap-2 text-sm text-blue-600 hover:underline"
-          >
-            <FileText className="size-4" />
-            View Logs for this Execution
-          </Link>
+          {logsHref && (
+            <Link
+              href={logsHref}
+              className="inline-flex items-center gap-2 text-sm text-blue-600 hover:underline"
+            >
+              <FileText className="size-4" />
+              View Logs for this Execution
+            </Link>
+          )}
 
           {/* Error panel */}
           {(execution.status === "FAILED" ||

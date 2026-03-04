@@ -105,6 +105,7 @@ export interface ExecutionDetailResponse {
   cause: string | null;
   stateMachineArn: string;
   history: ExecutionHistoryEventResponse[];
+  ecsTaskLogStream: string | null; // "ecs/{containerName}/{taskId}" or null
 }
 
 // ── Logs endpoint ──

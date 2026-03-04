@@ -93,6 +93,7 @@ export interface ExecutionHistoryEvent {
 export interface ExecutionDetailWithHistory {
   detail: ExecutionDetail;
   history: ExecutionHistoryEvent[];
+  ecsTaskLogStream: string | null;
 }
 
 export interface ListExecutionsOptions {

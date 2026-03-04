@@ -12,6 +12,8 @@ export interface UseLogsOptions {
   endTime: string | null;
   filter?: string;
   nextToken?: string;
+  executionArn?: string;       // scopes SFN logs to this execution
+  ecsTaskLogStream?: string;   // scopes ECS logs to this log stream
 }
 
 export function useLogs({
@@ -21,6 +23,8 @@ export function useLogs({
   endTime,
   filter,
   nextToken,
+  executionArn,
+  ecsTaskLogStream,
 }: UseLogsOptions) {
   const params = new URLSearchParams();
   params.set("logGroup", logSource);
@@ -28,6 +32,8 @@ export function useLogs({
   if (endTime) params.set("endTime", endTime);
   if (filter) params.set("filter", filter);
   if (nextToken) params.set("nextToken", nextToken);
+  if (executionArn) params.set("executionArn", executionArn);
+  if (ecsTaskLogStream) params.set("ecsTaskLogStream", ecsTaskLogStream);
 
   const url = `/api/pipelines/${encodeURIComponent(pipelineId)}/logs?${params.toString()}`;
 
