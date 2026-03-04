@@ -50,6 +50,8 @@ export async function GET(
     const startTimeParam = url.searchParams.get("startTime");
     const endTimeParam = url.searchParams.get("endTime");
     const filter = url.searchParams.get("filter") || undefined;
+    const executionArn = url.searchParams.get("executionArn") || undefined;
+    const ecsTaskLogStream = url.searchParams.get("ecsTaskLogStream") || undefined;
     const nextToken = url.searchParams.get("nextToken") || undefined;
     const limitParam = url.searchParams.get("limit");
 
@@ -105,17 +107,32 @@ export async function GET(
       );
     }
 
-    // 8. Fetch logs
+    // 8. Build execution-scoping options
+    let resolvedFilterPattern: string | undefined = filter;
+    let logStreamNames: string[] | undefined;
+
+    if (logGroup === "sfn" && executionArn) {
+      // SFN logs: every entry has execution_arn as a JSON field
+      resolvedFilterPattern = `{ $.execution_arn = "${executionArn}" }`;
+      // user text filter not applied when execution-scoped (CloudWatch
+      // JSON filter patterns can't be combined with plain text patterns)
+    } else if (logGroup === "ecs" && ecsTaskLogStream) {
+      // ECS logs: scope to the specific task's log stream; user filter still applies
+      logStreamNames = [ecsTaskLogStream];
+    }
+
+    // 9. Fetch logs
     const result = await getLogs(
       logGroupName,
       startTime,
       endTime,
-      filter,
+      resolvedFilterPattern,
       nextToken,
-      limit
+      limit,
+      logStreamNames
     );
 
-    // 9. Build response
+    // 10. Build response
     const events: LogEventResponse[] = result.events.map((ev) => ({
       timestamp: new Date(ev.timestamp).toISOString(),
       message: ev.message,
