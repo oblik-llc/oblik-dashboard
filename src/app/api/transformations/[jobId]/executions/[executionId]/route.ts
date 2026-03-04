@@ -52,7 +52,7 @@ export async function GET(
     const executionArn = `arn:aws:states:${region}:${accountId}:execution:${sfnName}:${executionId}`;
 
     // 6. Fetch execution detail
-    const { detail, history } = await getExecutionDetail(executionArn);
+    const { detail, history, ecsTaskLogStream } = await getExecutionDetail(executionArn);
 
     // 7. Build response
     const body: ExecutionDetailResponse = {
@@ -66,6 +66,7 @@ export async function GET(
       error: detail.error ?? null,
       cause: detail.cause ?? null,
       stateMachineArn: detail.stateMachineArn,
+      ecsTaskLogStream,
       history: history.map(
         (ev): ExecutionHistoryEventResponse => ({
           id: ev.id,
