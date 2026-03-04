@@ -78,7 +78,8 @@ See `.env.local.example` for all required variables. Key ones:
 - **Auth flow:** NextAuth middleware → Cognito hosted UI → JWT session cookie
 - **Multi-tenant:** Cognito user groups (`client:{name}`) filter pipeline visibility
 - **Auto-refresh:** SWR polling (30s overview, 15s detail, 5s running executions)
-- **Admin authorization:** Explicit `"admin"` Cognito group check via `isAdmin()` in `src/lib/api/helpers.ts`. Used for write actions (not the implicit "no client groups" pattern used for read filtering).
+- **Admin authorization:** Explicit `"admin"` Cognito group check via `isAdmin()` in `src/lib/api/helpers.ts`. Used for write actions (not the implicit "no client groups" pattern used for read filtering). **Cognito group names are lowercase** — the pool uses `admin` and `client:{name}`, never `Admin`. Do not use capital-A `"Admin"` anywhere.
+- **Session identity:** `session.user.id` is the Cognito sub UUID; `session.user.username` is the human-readable username (e.g. `mason`). Use `username` when comparing against Cognito usernames in API route self-protection guards.
 - **Write-action API pattern:** Auth → admin check (403) → fetch resource (404) → multi-tenant check (404) → business logic guards (400/409) → rate limit (429) → execute → return 201. See `trigger/route.ts` as reference.
 - **Manual trigger:** Embeds audit info (`triggeredBy`, `triggeredAt`, `source`) in SFN execution input. Execution name format: `manual-{timestamp}-{uuid8}`.
 - **Alerting:** DynamoDB tables `oblik-alert-preferences` (per-pipeline config) and `oblik-alert-history` (with 90-day TTL). Delivers via SNS email and Slack webhooks. Evaluation logic in `alerts-evaluate.ts` handles failure, consecutive failures, and recovery detection with 5-min rate limiting.
