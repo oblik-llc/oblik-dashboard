@@ -7,18 +7,7 @@ import { Button } from "@/components/ui/button";
 import { usePipelines } from "@/hooks/use-pipelines";
 import { QuickStats, QuickStatsSkeleton } from "@/components/dashboard/quick-stats";
 import { PipelineCard, PipelineCardSkeleton } from "@/components/dashboard/pipeline-card";
-
-/** Maps client_name values to display group names. Unmapped names pass through as-is. */
-const CLIENT_GROUPS: Record<string, string> = {
-  flooret: "Flooret",
-  "flooret-commercial": "Flooret",
-  "flooret-d2c": "Flooret",
-  wavv: "Wavv",
-};
-
-function getClientGroup(clientName: string): string {
-  return CLIENT_GROUPS[clientName] ?? clientName;
-}
+import { getClientGroup } from "@/lib/format";
 
 export default function Home() {
   const lastUpdatedRef = useRef<Date | null>(null);

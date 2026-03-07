@@ -13,6 +13,7 @@ import {
   TransformationCard,
   TransformationCardSkeleton,
 } from "@/components/transformation/transformation-card";
+import { getClientGroup } from "@/lib/format";
 
 export default function TransformationsPage() {
   const lastUpdatedRef = useRef<Date | null>(null);
@@ -102,10 +103,29 @@ export default function TransformationsPage() {
           </p>
         </div>
       ) : jobs ? (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {jobs.map((job) => (
-            <TransformationCard key={job.jobId} job={job} />
-          ))}
+        <div className="space-y-8">
+          {Object.entries(
+            jobs.reduce<Record<string, typeof jobs>>((groups, j) => {
+              const group = getClientGroup(j.clientName);
+              (groups[group] ??= []).push(j);
+              return groups;
+            }, {})
+          )
+            .sort(([a], [b]) => a.localeCompare(b))
+            .map(([clientName, group]) => (
+              <section key={clientName}>
+                <h2 className="mb-3 text-lg font-semibold tracking-tight text-foreground">
+                  {clientName}
+                </h2>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {group
+                    .sort((a, b) => a.jobName.localeCompare(b.jobName))
+                    .map((job) => (
+                      <TransformationCard key={job.jobId} job={job} />
+                    ))}
+                </div>
+              </section>
+            ))}
         </div>
       ) : null}
     </div>

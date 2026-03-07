@@ -1,3 +1,15 @@
+/** Maps client_name values to display group names. Unmapped names pass through as-is. */
+const CLIENT_GROUPS: Record<string, string> = {
+  flooret: "Flooret",
+  "flooret-commercial": "Flooret",
+  "flooret-d2c": "Flooret",
+  wavv: "Wavv",
+};
+
+export function getClientGroup(clientName: string): string {
+  return CLIENT_GROUPS[clientName] ?? clientName;
+}
+
 export function formatDurationMs(ms: number): string {
   if (ms < 1000) return `${Math.round(ms)}ms`;
   const seconds = ms / 1000;
