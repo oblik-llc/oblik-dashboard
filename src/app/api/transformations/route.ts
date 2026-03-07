@@ -102,7 +102,9 @@ export async function GET() {
       };
     });
 
-    const body: TransformationJobsListResponse = { jobs: enriched };
+    const body: TransformationJobsListResponse = {
+      jobs: enriched.filter((job) => job.status !== "unknown"),
+    };
 
     return NextResponse.json(body, {
       headers: {
